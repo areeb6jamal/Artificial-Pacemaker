@@ -1,0 +1,62 @@
+<html>
+<head>
+    <title> Pacemaker Access Page</title>
+    <link rel=" stylesheet" href="style.css"
+
+</head>
+<body>
+    <div class="bck">
+        <div class="mac-icon">
+            <img src="mcmaster.png"/>
+
+        </div>
+       
+        <div class=" form-box">
+            
+            <div class="button-box">
+                <div id="btn"></div>
+                <button type="button" class="buttonz" onclick="Login()">Log In</button>
+                <button type="button" class="buttonz" onclick="Register()">Register</button>
+            </div>
+            <div>
+                <form id="Login" class="input-group">
+                    <input type="text" class="input-field" placeholder="Username" required />
+                    <input type="text" class="input-field" placeholder="Password" required />
+                    <input type="checkbox" class="checkbox" /><span>Remember Password</span>
+                    <button type="submit" class="submit-btn">Login</button>
+
+                </form>
+                <form id="Register" class="input-group">
+                    <input type="text" class="input-field" placeholder="Username" required />
+                    <input type="text" class="input-field" placeholder="Email Address" required />
+                    <input type="text" class="input-field" placeholder="Password" required />
+                   
+                    <button type="submit" class="submit-btn">Register</button>
+
+                </form>
+            </div>
+        </div>
+ 
+
+    </div>
+    <script>
+        var x = document.getElementById("Login");
+        var y = document.getElementById("Register");
+        var z = document.getElementById("btn");
+
+        function Register() {
+            x.style.left = "-400px";
+            y.style.left = "50px";
+            z.style.left = "110px";
+        }
+
+        function Login() {
+            x.style.left = "50px";
+            y.style.left = "450px";
+            z.style.left = "0px";
+        }
+
+    </script>
+
+</body>
+</html>
