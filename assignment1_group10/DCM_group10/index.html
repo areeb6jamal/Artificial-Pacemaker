@@ -1,18 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Hello World!</title>
-  </head>
+<head>
+    <title> Pacemaker Access Page</title>
+    <link rel="stylesheet" href="./assets/style.css"
+</head>
 
-  <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
-  </body>
+<body>
+    <div class="bck">
+        <div class="mac-icon">
+            <img src="./assets/mcmaster.png"/>
+        </div>
+       
+        <div class=" form-box">
+            <div class="button-box">
+                <div id="btn"></div>
+                <button type="button" class="buttonz" onclick="Login()">Log In</button>
+                <button type="button" class="buttonz" onclick="Register()">Register</button>
+            </div>
+            <div>
+                <form id="Login" class="input-group">
+                    <input type="text" class="input-field" placeholder="Username" required />
+                    <input type="text" class="input-field" placeholder="Password" required />
+                    <input type="checkbox" class="checkbox" /><span>Remember Password</span>
+                    <button type="submit" class="submit-btn">Login</button>
 
-  <script src="./models/user.js"></script>
+                </form>
+                <form id="Register" class="input-group">
+                    <input type="text" class="input-field" placeholder="Username" required />
+                    <input type="text" class="input-field" placeholder="Email Address" required />
+                    <input type="text" class="input-field" placeholder="Password" required />
+                   
+                    <button type="submit" class="submit-btn">Register</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
 </html>

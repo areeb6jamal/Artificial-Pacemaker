@@ -3,7 +3,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "node": "^18.11.0"
   },
-  "name": "dcm_group10",
+  "name": "DCM Group 10",
   "description": "DCM",
   "version": "1.0.0",
   "main": "main.js",
@@ -25,7 +25,7 @@
     "type": "git",
     "url": "https://github.com/wangp56/3K04.git"
   },
-  "author": "David Wildauer",
+  "author": "Sava Jankovic, David Wildauer",
   "license": "MIT",
   "config": {
     "forge": {
