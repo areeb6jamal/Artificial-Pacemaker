@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Navbar Template · Bootstrap v5.2</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="./assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/style.css">
+  </head>
+  <body>
+    
+<main>
+    <nav class="navbar navbar-expand-lg bg-light rounded" aria-label="Twelfth navbar example">
+      <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample10" aria-controls="navbarsExample10" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-md-center" id="navbarsExample10">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Centered nav only</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a id="dropdown-user" class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
+              <ul class="dropdown-menu">
+                <li><a id="itm-logout" class="dropdown-item">Logout</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div>
+      <div class="bg-light p-5 rounded">
+        <div class="col-sm-8 mx-auto">
+          <h1>Navbar examples</h1>
+          <p>This example is a quick exercise to illustrate how the navbar and its contents work. Some navbars extend the width of the viewport, others are confined within a <code>.container</code>. For positioning of navbars, checkout the <a href="../examples/navbar-static/">top</a> and <a href="../examples/navbar-fixed/">fixed top</a> examples.</p>
+          <p>At the smallest breakpoint, the collapse plugin is used to hide the links and show a menu button to toggle the collapsed content.</p>
+          <p>
+            <a class="btn btn-primary" href="../components/navbar/" role="button">View navbar docs &raquo;</a>
+          </p>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Open this select menu</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+  <script src="./assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="./models/user.js"></script>
+  <script src="./home.js"></script>
+  </body>
+</html>

@@ -1,16 +1,12 @@
 let highestUserId = -1;
-let currentUser = null;
 
 class User {
-  constructor(id, username, email, password) {
+  constructor(id, username, email, password, data = {}) {
     this.id = id;
     this.username = username;
     this.email = email;
     this.password = password;
-
-    if (highestUserId < 0) {
-      User.setHighestUserId();
-    }
+    this.data = data;
   }
 
   async register() {
@@ -18,12 +14,17 @@ class User {
       return false;
     }
 
+    if (highestUserId < 0) {
+      User.setHighestUserId();
+    }
+    this.id = ++highestUserId;
+
+    // Hash the plaintext password
     this.password = await window.eAPI.bcryptHash(this.password);
 
     // Save user in local storage
-    this.id = ++highestUserId;
-    localStorage.setItem(this.id, JSON.stringify([String(this.username),
-      String(this.email), String(this.password)]));
+    localStorage.setItem(this.username, JSON.stringify([this.id,
+      String(this.email), String(this.password), this.data]));
 
     return true;
   }
@@ -31,11 +32,15 @@ class User {
   async login(plaintextPassword) {
     const result = await window.eAPI.bcryptCompare(plaintextPassword, this.password);
     if (result === true) {
-      currentUser = this;
+      User.currentUser = this;
       return true;
     } else {
       return false;
     }
+  }
+
+  logout() {
+    sessionStorage.removeItem("currentUser");
   }
 
   update() {
@@ -44,13 +49,13 @@ class User {
     }
 
     // Save user in local storage
-    localStorage.setItem(this.id, JSON.stringify([String(this.username),
-      String(this.email), String(this.password)]));
+    localStorage.setItem(this.username, JSON.stringify([this.id,
+      String(this.email), String(this.password), this.data]));
   }
 
   delete() {
     // Delete user from local storage
-    localStorage.removeItem(this.id);
+    localStorage.removeItem(this.username);
   }
 
   static get highestUserId() {
@@ -58,27 +63,42 @@ class User {
   }
 
   static get currentUser() {
+    let currentUser = null;
+
+    const entry = sessionStorage.getItem("currentUser");
+    if (entry) {
+      currentUser = User.getUserByUsername(entry);
+    }
+
     return currentUser;
+  }
+
+  static set currentUser(currentUser) {
+    sessionStorage.setItem("currentUser", currentUser.username);
   }
 
   static getUserByUsername(username) {
     let user = null;
 
-    Object.entries(localStorage).forEach(entry => {
-      const u = JSON.parse(entry[1]);
-      if (u[0] == username) {
-        user = new User(entry[0], u[0], u[1], u[2]);
-      }
-    });
+    const value = localStorage.getItem(username);
+    if (value) {
+      const u = JSON.parse(value);
+      user = new User(u[0], username, u[1], u[2], u[3]);
+    }
 
     return user;
   }
 
   static setHighestUserId() {
     Object.entries(localStorage).forEach(entry => {
-      if (entry[0] > highestUserId) {
-        highestUserId = entry[0];
+      const u = JSON.parse(entry[1]);
+      if (u[0] > highestUserId) {
+        highestUserId = u[0];
       }
     });
+  }
+
+  static get numRegisteredUsers() {
+    return localStorage.length;
   }
 }

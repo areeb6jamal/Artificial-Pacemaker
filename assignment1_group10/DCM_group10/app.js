@@ -27,26 +27,29 @@ registerButton.addEventListener('click', async () => {
   const user = new User(-1, registerUsernameInput.value,
     registerEmailInput.value, registerPasswordInput.value);
 
-  if (User.highestUserId == 9) {
+  if (User.numRegisteredUsers === 10) {
     alert("Error: Maximum number of users (10) has been reached!");
     return;
   }
 
   const registerResult = await user.register();
-  if (registerResult == false) {
+  if (registerResult === false) {
     alert('Error: Username "' + user.username + '" already exists!');
   }
 });
 
 loginButton.addEventListener('click', async () => {
   const user = User.getUserByUsername(loginUsernameInput.value);
-  if (user == null) {
+  if (user === null) {
     alert("Error: Username does not exist!");
+    return;
   }
 
+  console.log(user);
+  alert("");
   const loginResult = await user.login(loginPasswordInput.value);
   if (loginResult) {
-    alert("Success!");
+    window.location.href = "home.html";
   } else {
     alert("Error: Password is not correct!");
   }
