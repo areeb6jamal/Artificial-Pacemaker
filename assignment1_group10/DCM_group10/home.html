@@ -3,33 +3,44 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Navbar Template · Bootstrap v5.2</title>
+    <title>Pacemaker DCM · Home</title>
 
     <!-- Bootstrap CSS -->
     <link href="./assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/style.css">
   </head>
   <body>
-    
-<main>
-    <nav class="navbar navbar-expand-lg bg-light rounded" aria-label="Twelfth navbar example">
+
+  <main>
+    <nav class="navbar navbar-expand-lg bg-light">
       <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample10" aria-controls="navbarsExample10" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03"
+          aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-md-center" id="navbarsExample10">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Centered nav only</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a id="dropdown-user" class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
-              <ul class="dropdown-menu">
+        <a class="navbar-brand" href="#">
+          <img src="./assets/mcmaster-small.png" alt="Logo" width="19" height="26" class="d-inline-block align-text-top">
+          Pacemaker DCM
+        </a>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+          <form class="d-flex" role="user">
+            <button id="btn-connect" class="btn btn-success" type="button" aria-expanded="false">
+              Connect Device
+            </button>
+            <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Account
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a id="itm-user" class="dropdown-item disabled">User</a></li>
+                <li><hr class="dropdown-divider"></li>
                 <li><a id="itm-logout" class="dropdown-item">Logout</a></li>
               </ul>
-            </li>
-          </ul>
+            </div>
+          </form>
         </div>
       </div>
     </nav>
@@ -37,18 +48,129 @@
     <div>
       <div class="bg-light p-5 rounded">
         <div class="col-sm-8 mx-auto">
-          <h1>Navbar examples</h1>
-          <p>This example is a quick exercise to illustrate how the navbar and its contents work. Some navbars extend the width of the viewport, others are confined within a <code>.container</code>. For positioning of navbars, checkout the <a href="../examples/navbar-static/">top</a> and <a href="../examples/navbar-fixed/">fixed top</a> examples.</p>
-          <p>At the smallest breakpoint, the collapse plugin is used to hide the links and show a menu button to toggle the collapsed content.</p>
-          <p>
-            <a class="btn btn-primary" href="../components/navbar/" role="button">View navbar docs &raquo;</a>
-          </p>
-            <select class="form-select" aria-label="Default select example">
-              <option selected>Open this select menu</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
+
+          <div id="liveAlertPlaceholder"></div>
+
+          <h2>Pacing Modes - Parameters</h2>
+          <p>Select a pacing mode below to start viewing and configuring the corresponding parameters.</p>
+          <br>
+          <div class="col-8">
+            <div class="input-group mb-3">
+              <span class="input-group-text">Device Serial Number</span>
+              <input type="text" id="input-dsn" class="form-control" aria-label="Serial Number" disabled>
+              <button class="btn btn-secondary" id="btn-dsn" type="button">Update</button>
+            </div>
+          </div>
+          <div class="form-floating col-8">
+            <select class="form-select" id="select-pacing" aria-label="Default select example">
+              <option value="none" selected>Select Pacing Mode</option>
+              <option value="aoo">AOO</option>
+              <option value="voo">VOO</option>
+              <option value="vvi">VVI</option>
             </select>
+              <label for="floatingSelect">Pacing Mode</label>
+          </div>
+          <br>
+
+          <div class="container text-center">
+            <div class="row align-items-start">
+              <div class="col-8">
+                <label for="input-range-lrl" class="form-label">Lower Rate Limit</label>
+                <input type="range" min="30" max="175" step="5" value="60" class="form-range" id="input-range-lrl"
+                  oninput="document.getElementById('text-lrl').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-lrl" class="form-label">ppm</label>
+                  <input type="text" value="60" class="form-control text-center" id="text-lrl" aria-label="Lower Rate Limit (ppm)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-url" class="form-label">Upper Rate Limit</label>
+                <input type="range" min="50" max="175" step="5" value="120" class="form-range" id="input-range-url"
+                  oninput="document.getElementById('text-url').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-url" class="form-label">ppm</label>
+                  <input type="text" value="120" class="form-control text-center" id="text-url" aria-label="Upper Rate Limit (ppm)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-aa" class="form-label">Atrial Amplitude</label>
+                <input type="range" min="0.5" max="7.0" step="0.1" value="3.5" class="form-range" id="input-range-aa"
+                  oninput="document.getElementById('text-aa').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-aa" class="form-label">V</label>
+                  <input type="text" value="3.5" class="form-control text-center" id="text-aa" aria-label="Atrial Amplitude (V)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-apw" class="form-label">Atrial Pulse Width</label>
+                <input type="range" min="0.1" max="1.9" step="0.1" value="0.4" class="form-range" id="input-range-apw"
+                  oninput="document.getElementById('text-apw').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-apw" class="form-label">ms</label>
+                  <input type="text" value="0.4" class="form-control text-center" id="text-apw" aria-label="Atrial Pulse Width (ms)"
+                    disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-va" class="form-label">Ventricular Amplitude</label>
+                <input type="range" min="0.5" max="7.0" step="0.1" value="3.5" class="form-range" id="input-range-va"
+                  oninput="document.getElementById('text-va').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-va" class="form-label">V</label>
+                  <input type="text" value="3.5" class="form-control text-center" id="text-va" aria-label="Ventricular Amplitude (V)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-vpw" class="form-label">Ventricular Pulse Width</label>
+                <input type="range" min="0.1" max="1.9" step="0.1" value="0.4" class="form-range" id="input-range-vpw"
+                  oninput="document.getElementById('text-vpw').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-apw" class="form-label">ms</label>
+                  <input type="text" value="0.4" class="form-control text-center" id="text-vpw" aria-label="Ventricular Pulse Width (ms)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-vrp" class="form-label">VRP</label>
+                <input type="range" min="150" max="500" step="10" value="320" class="form-range" id="input-range-vrp"
+                  oninput="document.getElementById('text-vrp').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-vrp" class="form-label">ms</label>
+                  <input type="text" value="320" class="form-control text-center" id="text-vrp" aria-label="VRP (ms)" disabled>
+                </div>
+              </div>
+              <div class="col-8">
+                <label for="input-range-arp" class="form-label">ARP</label>
+                <input type="range" min="150" max="500" step="10" value="250" class="form-range" id="input-range-arp"
+                  oninput="document.getElementById('text-arp').value = this.value" disabled>
+              </div>
+              <div class="col-2">
+                <div class="mb-3">
+                  <label for="text-arp" class="form-label">ms</label>
+                  <input type="text" value="250" class="form-control text-center" id="text-arp" aria-label="ARP (ms)" disabled>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="container text-center">
+            <div class="col-8">
+            <button type="button" class="col btn btn-primary" id="btn-save" disabled>&raquo; Save</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -58,5 +180,21 @@
   <script src="./assets/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="./models/user.js"></script>
   <script src="./home.js"></script>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check-circle-fill" viewBox="0 0 16 16">
+      <path
+        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+    </symbol>
+    <symbol id="info-fill" viewBox="0 0 16 16">
+      <path
+        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+    </symbol>
+    <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+      <path
+        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+    </symbol>
+  </svg>
+
   </body>
 </html>

@@ -46,7 +46,6 @@ loginButton.addEventListener('click', async () => {
   }
 
   console.log(user);
-  alert("");
   const loginResult = await user.login(loginPasswordInput.value);
   if (loginResult) {
     window.location.href = "home.html";
