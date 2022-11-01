@@ -6,8 +6,10 @@ const saltRounds = 10
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1000,
+    width: 980,
     height: 800,
+    minWidth: 768,
+    center: true,
     icon: 'assets/mcmaster-small.png',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')

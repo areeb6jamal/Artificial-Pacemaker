@@ -1,4 +1,4 @@
-const userItem = document.getElementById("itm-user");
+const userItem = document.getElementById('itm-user');
 const logoutItem = document.getElementById('itm-logout');
 const connectButton = document.getElementById('btn-connect');
 const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
@@ -26,13 +26,13 @@ const paramConfigs = {
   URL: ['Upper Rate Limit', 'ppm', [[50, 175, 5]], 120],
   APA: ['Atrial Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
   VPA: ['Ventricular Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
-  APW: ['Atrial Pulse Width', 'ms', [[0.1, 1.9, 0.1], [0.05, 0.1, 0.05]], 0.4],
-  VPW: ['Ventricular Pulse Width', 'ms', [[0.1, 1.9, 0.1], [0.05, 0.1, 0.05]], 0.4],
-  VS:  ['Ventricular Sensitivity', 'mV', [[0.5, 10, 0.5], [0.25, 1, 0.25]], 2.5],
+  APW: ['Atrial Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
+  VPW: ['Ventricular Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
+  VS:  ['Ventricular Sensitivity', 'mV', [[0.5, 10, 0.5], []], 2.5],
   VRP: ['Ventricular Refractory Period (VRP)', 'ms', [[150, 500, 10]], 320],
   ARP: ['Atrial Refractory Period (ARP)', 'ms', [[150, 500, 10]], 250],
   HRL: ['Hysteresis Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 0, true],
-  RS:  ['Rate Smoothing', '%', [[0, 25, 3], [20, 26, 5]], 0, true]
+  RS:  ['Rate Smoothing', '%', [[3, 24, 3], []], 0, true]
 };
 
 let currentUser = User.currentUser;
@@ -85,51 +85,22 @@ connectButton.addEventListener('click', () => {
 
 const selectPacingMode = async () => {
   slidersContainer.innerHTML = '';
-
   const selectedMode = pacingModeInput.value.toUpperCase();
+
   pacingModesParams[selectedMode].forEach(param => {
     const config = paramConfigs[param.toUpperCase()];
-    const range = config[2][0]; // this is the bigger range
-    let value = config[3];  // default value
+    let value = config[3]; // default value
 
     if (currentUser.data.params && currentUser.data.params[pacingModeInput.value]) {
-      // If a value is already stored, use this instead of the default
+      // If a value is already stored in database, use it instead of the default
       const v = currentUser.data.params[pacingModeInput.value][param];
       if (v !== undefined) {
         value = v;
       }
     }
 
-    let sliderColWidth = 10;
-    const disabled = value == 0 ? true : false;
-
-    // Add HTML code for parameter ON/OFF switch to the container
-    if (config[4]) {
-      sliderColWidth = 9;
-      slidersContainer.innerHTML += [
-        '<div class="col-1 form-check form-switch">',
-        `  <br><input class="form-check-input" type="checkbox" role="switch"`,
-        `   oninput="toggleSwitch('${param}')" id="switch-${param}">`,
-        `  <label for="switch-${param}" class="form-label" id="label-switch-${param}">${disabled ? 'OFF' : 'ON'}</label>`,
-        '</div>', ''
-      ].join("\n");
-    }
-
-    // Add HTML code for slider and text field to the container
-    slidersContainer.innerHTML += [
-      `<div class="col-${sliderColWidth}">`,
-      `  <label for="input-range-${param}" class="form-label">${config[0]}</label>`,
-      `  <input type="range" min="${range[0]}" max="${range[1]}" step="${range[2]}" value="${disabled ? config[3] : value}"`,
-      `    class="form-range" oninput="handleInput(this.id, '${param}', this.value)" id="input-range-${param}"${disabled ? ' disabled' : ''}>`,
-      '</div>',
-      '<div class="col-2">',
-      `  <label for="text-${param}" class="form-label"><br></label>`,
-      '  <div class="input-group mb-3">',
-      `    <input type="text" value="${disabled ? '-' : value}" class="form-control text-center" id="text-${param}" aria-label="${config[0]} (${config[1]})" readonly>`,
-      `    <span class="input-group-text">${config[1]}</span>`,
-      '  </div>',
-      '</div>', ''
-    ].join("\n");
+    // Creates a slider with a text field for the paramter
+    createParameterInput(param, config, value);
   });
 
   if (selectedMode === 'NONE') {
@@ -158,6 +129,51 @@ saveButton.addEventListener('click', async () => {
   currentUser.update();
 });
 
+function createParameterInput(param, config, value) {
+  const range = config[2][0]; // range the input must cover
+  const disabled = value == 0 ? true : false;
+
+  // Create HTML element for slider and add label with switch (if required)
+  const slider = document.createElement('div');
+  slidersContainer.appendChild(slider);
+  slider.className = 'col-md-9';
+
+  if (config[4]) {
+    // Add ON/OFF switch for the parameter
+    slider.innerHTML = [
+      `<label for="input-range-${param}" class="form-label"><div class="d-flex my-switch">`,
+      `  <div class="form-text">${config[0]}</div>`,
+      '  <div class="form-check form-switch form-check-inline">',
+      `    <input class="form-check-input form-check-inline" type="checkbox" role="switch"`,
+      `     oninput="toggleSwitch('${param}')" id="switch-${param}"${disabled ? '' : ' checked'}>`,
+      '  </div>',
+      `  <div class="form-text" id="label-switch-${param}">${disabled ? 'OFF' : 'ON'}</div>`,
+      '</div></label>', ''
+    ].join("\n");
+  } else {
+    slider.innerHTML = `<label for="input-range-${param}" class="form-label">${config[0]}</label>`;
+  }
+
+  // Add HTML code for the actual slider to the element
+  slider.innerHTML += [
+    `<input type="range" min="${range[0]}" max="${range[1]}" step="${range[2]}" value="${disabled ? config[3] : value}"`,
+    ` class="form-range" oninput="handleInput(this.id, '${param}', this.value)" id="input-range-${param}"${disabled ? ' disabled' : ''}>`, ''
+  ].join("\n");
+
+  // Create HTML element for slider's text field and add it to the container
+  const sliderText = document.createElement('div');
+  slidersContainer.appendChild(sliderText);
+  sliderText.className = 'col-md-3';
+
+  sliderText.innerHTML = [
+    `<label for="text-${param}" class="form-label"><br></label>`,
+    '<div class="input-group mb-3">',
+    `  <input type="text" value="${disabled ? '-' : value}" class="form-control text-center" id="text-${param}" aria-label="${config[0]} (${config[1]})" readonly>`,
+    `  <span class="input-group-text">${config[1]}</span>`,
+    '</div>', ''
+  ].join("\n");
+}
+
 function customAlert(message, type) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = [
@@ -174,28 +190,6 @@ function customAlert(message, type) {
   }, 3500);
 }
 
-async function handleInput(id, param, value) {
-  const ranges = paramConfigs[param.toUpperCase()][2];
-
-  // If a second range exists, switch the step size when neccessary
-  if (ranges[1]) {
-    const slider = document.getElementById(id);
-    if ((param === 'vpw' || param === 'apw' || param == 'vs') && value <= ranges[0][0]) {
-      slider.step = ranges[1][2];
-      slider.min = ranges[1][2];
-    } else if (ranges[1][0] < value && value < ranges[1][1]) {
-      slider.step = ranges[1][2];
-    } else {
-      slider.step = ranges[0][2];
-      slider.min = ranges[0][0];
-    }
-    console.log(slider.min, value, slider.max, slider.step);
-  }
-
-  // Set the text field to the current value of the slider
-  document.getElementById(`text-${param}`).value = value;
-}
-
 async function toggleSwitch(param) {
   const label = document.getElementById(`label-switch-${param}`);
   const slider = document.getElementById(`input-range-${param}`);
@@ -209,5 +203,77 @@ async function toggleSwitch(param) {
     label.textContent = 'ON';
     slider.disabled = false;
     text.value = slider.value;
+  }
+}
+
+async function handleInput(id, param, value) {
+  const ranges = paramConfigs[param.toUpperCase()][2];
+
+  // If a second range exists, switch the step size when neccessary
+  if (ranges[1]) {
+    switch (param.toUpperCase()) {
+      case 'VPW': case 'APW':
+        switchStepSizePulseWidth(id, value);
+        break;
+      case 'VS':
+        switchStepSizePulseSensitivity(id, value);
+        break;
+      case 'RS':
+        switchStepSizeRateSmoothing(id, value);
+        break;
+      default: // LRL, APA, VPA, HRL
+        switchStepSize(id, ranges, value);
+        break;
+    }
+  }
+
+  // Set the text field to the current value of the slider
+  document.getElementById(`text-${param}`).value = value;
+}
+
+function switchStepSize(id, ranges, value) {
+  const slider = document.getElementById(id);
+  if (ranges[1][0] < value && value < ranges[1][1]) {
+    slider.step = ranges[1][2];
+  } else {
+    slider.step = ranges[0][2];
+  }
+}
+
+function switchStepSizePulseWidth(id, value) {
+  const slider = document.getElementById(id);
+  if (value == 0.1) {
+    slider.step = 0.05;
+    slider.min = 0.05;
+  } else if (value == 0.15) {
+    slider.step = 0.1;
+    slider.min = 0.1;
+    slider.value += 0.05;
+  }
+}
+
+function switchStepSizePulseSensitivity(id, value) {
+  const slider = document.getElementById(id);
+  if (value == 1) {
+    slider.step = 0.25;
+    slider.min = 0.25;
+  } else if (value == 1.25) {
+    slider.step = 0.5;
+    slider.min = 0.5;
+    slider.value += 0.25;
+  }
+}
+
+function switchStepSizeRateSmoothing(id, value) {
+  const slider = document.getElementById(id);
+  if (value == 21) {
+    slider.step = 5;
+    slider.min = 5;
+    slider.max = 25;
+  } else if (value == 20) {
+    slider.step = 3;
+    slider.min = 3;
+    slider.max = 24;
+    slider.value += 1;
   }
 }

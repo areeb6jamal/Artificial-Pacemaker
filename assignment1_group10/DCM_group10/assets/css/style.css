@@ -56,3 +56,21 @@ body {
 .navbar {
   margin-bottom: 20px;
 }
+
+.my-switch {
+  padding-top: 6px;
+}
+
+.my-switch .form-switch {
+  margin: 4px -8px 0 20px;
+}
+
+.form-text {
+  margin-top: .25rem;
+  font-size: .95rem;
+  color: #000000;
+}
+
+* {
+  font-size: .95rem;
+}

@@ -14,54 +14,47 @@
   <main>
     <nav class="navbar navbar-expand-lg bg-light">
       <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03"
-          aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
         <a class="navbar-brand" href="#">
           <img src="./assets/mcmaster-small.png" alt="Logo" width="19" height="26" class="d-inline-block align-text-top">
           Pacemaker DCM
         </a>
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-          <form class="d-flex" role="user">
-            <button id="btn-connect" class="btn btn-success" type="button" aria-expanded="false">
-              Connect Device
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <form class="d-flex" role="user">
+          <button id="btn-connect" class="btn btn-success" type="button" aria-expanded="false">
+            Connect Device
+          </button>
+          <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Account
             </button>
-            <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Account
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a id="itm-user" class="dropdown-item disabled">User</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a id="itm-logout" class="dropdown-item">Logout</a></li>
-              </ul>
-            </div>
-          </form>
-        </div>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a id="itm-user" class="dropdown-item disabled">User</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a id="itm-logout" class="dropdown-item">Logout</a></li>
+            </ul>
+          </div>
+        </form>
       </div>
     </nav>
 
     <div>
-      <div class="bg-light p-5 rounded">
-        <div class="col-sm-8 mx-auto">
+      <div class="bg-light p-3 rounded">
+        <div class="col-lg-7 mx-auto">
 
           <div id="liveAlertPlaceholder"></div>
 
           <h2>Pacing Modes - Parameters</h2>
           <p>Select a pacing mode below to start viewing and configuring the corresponding parameters.</p>
           <br>
-          <div class="col-10">
+          <div class="col-md-9">
             <div class="input-group mb-3">
               <span class="input-group-text">Device Serial Number</span>
               <input type="text" id="input-dsn" class="form-control" aria-label="Serial Number" disabled>
               <button class="btn btn-secondary" id="btn-dsn" type="button">Update</button>
             </div>
           </div>
-          <div class="col-5 form-floating">
+          <div class="col-md-3 form-floating">
             <select class="form-select" id="select-pacing" aria-label="Default select example">
               <option value="none" selected>Select Pacing Mode</option>
               <option value="aoo">AOO</option>
@@ -71,12 +64,7 @@
               <label for="floatingSelect">Pacing Mode</label>
           </div>
           <br>
-
-          <div class="container text-center">
-            <div class="row align-items-center" id="container-sliders">
-            </div>
-          </div>
-          <br>
+          <div class="row align-items-center" id="container-sliders"></div>
           <div class="container text-center">
             <div class="col-8">
             <button type="button" class="col btn btn-primary" id="btn-save" disabled>&raquo; Save</button>
