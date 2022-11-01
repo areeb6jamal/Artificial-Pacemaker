@@ -1,7 +1,7 @@
 const userItem = document.getElementById('itm-user');
 const logoutItem = document.getElementById('itm-logout');
 const connectButton = document.getElementById('btn-connect');
-const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+const alertContainer = document.getElementById('container-alert');
 
 const dsnInput = document.getElementById('input-dsn');
 const dsnButton = document.getElementById('btn-dsn');
@@ -65,20 +65,20 @@ let deviceConnected = false;
 connectButton.addEventListener('click', () => {
   if (currentUser.data.dsn) {
     if (deviceConnected) {
-      customAlert(`Device (S/N ${currentUser.data.dsn}) disconnected`, 'warning');
+      customAlert('warning', `Device (S/N ${currentUser.data.dsn}) disconnected`);
       connectButton.className = 'btn btn-success';
       connectButton.innerText = 'Connect Device';
       deviceConnected = false;
     } else {
       connectButton.disabled = true;
-      customAlert(`Connecting Device (S/N ${currentUser.data.dsn}) please wait...`, 'warning');
+      customAlert('warning', `Connecting Device (S/N ${currentUser.data.dsn}) please wait...`, 3.5);
       setTimeout(() => {
-        customAlert(`Device (S/N ${currentUser.data.dsn}) successfully connected!`, 'success');
+        customAlert('success', `Device (S/N ${currentUser.data.dsn}) successfully connected!`);
         connectButton.className = 'btn btn-danger';
         connectButton.innerText = 'Disconnect Device';
         connectButton.disabled = false;
         deviceConnected = true;
-      }, 3500);
+      }, 3.8 * 1000);
     }
   }
 });
@@ -174,20 +174,22 @@ function createParameterInput(param, config, value) {
   ].join("\n");
 }
 
-function customAlert(message, type) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = [
+function customAlert(type, message, timeout = 5) {
+  alertContainer.innerHTML = [
     `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
     `   <div>&#9432; ${message}</div>`,
-    `   <button type="button" id="btn-alert-${type}" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`,
+    `   <button type="button" id="btn-alert" class="btn-close" data-bs-dismiss="alert" onclick="addAlertPlaceholder()"></button>`,
     '</div>'
   ].join('');
 
-  alertPlaceholder.append(wrapper);
-
   setTimeout(() => {
-    document.getElementById(`btn-alert-${type}`).click();
-  }, 3500);
+    const btn = document.getElementById('btn-alert');
+    if (btn) btn.click();
+  }, timeout * 1000);
+}
+
+function addAlertPlaceholder() {
+  alertContainer.innerHTML = '<div class="alert hide" role="alert"><div><br></div></div>';
 }
 
 async function toggleSwitch(param) {
