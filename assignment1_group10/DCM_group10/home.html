@@ -56,23 +56,31 @@
               <button class="btn btn-secondary" id="btn-dsn" type="button">Update</button>
             </div>
           </div>
-          <div class="col-md-3 form-floating">
-            <select class="form-select" id="select-pacing" aria-label="Default select example">
-              <option value="none" selected>Select Pacing Mode</option>
-              <option value="aoo">AOO</option>
-              <option value="voo">VOO</option>
-              <option value="vvi">VVI</option>
-            </select>
-              <label for="floatingSelect">Pacing Mode</label>
+          <div class="col-md-9">
+            <div class="input-group mb-3">
+              <div class="form-floating">
+                <select class="form-select" id="select-pacing" aria-label="Default select example">
+                  <option value="none" selected>Select Pacing Mode</option>
+                  <option value="aoo">AOO</option>
+                  <option value="voo">VOO</option>
+                  <option value="vvi">VVI</option>
+                </select>
+                  <label for="floatingSelect">Pacing Mode</label>
+              </div>
+              <button type="button" class="col btn btn-primary" id="btn-read" disabled>Read Parameters from Pacemaker</button>
+            </div>
           </div>
           <br>
           <div class="row align-items-center" id="container-sliders"></div>
-          <div class="container text-center">
-            <div class="col-8">
-            <button type="button" class="col btn btn-primary" id="btn-save" disabled>&raquo; Save on DCM</button>
+          <div class="row container text-center">
+            <div class="col-md-3">
+              <button type="button" class="col btn btn-primary" id="btn-save" disabled>Save on DCM</button>
             </div>
-            <div class="col-8">
-              <button type="button" class="col btn btn-primary" id="btn-write" disabled>&raquo; Write to Pacemaker</button>
+            <div class="col-md-3">
+              <button type="button" class="col btn btn-primary" id="btn-write" disabled>Write to Pacemaker</button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" class="col btn btn-danger" id="btn-cancel">CANCEL</button>
             </div>
           </div>
         </div>

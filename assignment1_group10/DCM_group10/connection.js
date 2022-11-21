@@ -13,7 +13,8 @@ const fnCodeHex = {
 class Connection {
   constructor() {
     this.serialPort = null;
-    this.dataBuffer = null;
+    this.dataBuffer = Buffer.alloc(16);
+    this.receiveParamsHandler = null;
   }
 
   async connect(serialNumber) {
@@ -58,8 +59,68 @@ class Connection {
     }
   }
 
-  readData() {
-    console.log('Data: ', this.serialPort.read());
+  readData(readBuffer = this.serialPort.read()) {
+    console.log('Read Data: ', readBuffer);
+
+    if (readBuffer[0] !== 0x10) {
+      console.log('Read Error: SYNC');
+      return false;
+    }
+
+    switch(readBuffer[1]) {
+      case fnCodeHex.pparams:
+        const params = this._readParamsFromBuffer(readBuffer);
+        if (params) {
+          return this.receiveParamsHandler(null, params);
+        } else {
+          return false;
+        }
+        break;
+
+      case fnCodeHex.egram:
+        // TODO: process egram data
+        break;
+
+      default:
+        console.log('Read Error: FnCode not supported!');
+        return false;
+    }
+  }
+
+  _readParamsFromBuffer(readBuffer = Buffer.alloc(16)) {
+    let pacingMode;
+    switch(readBuffer[2]) {
+      case pacingModeHex.AOO:
+        pacingMode = 'aoo';
+        break;
+      case pacingModeHex.VOO:
+        pacingMode = 'voo';
+        break;
+      case pacingModeHex.VVI:
+        pacingMode = 'vvi';
+        break;
+      default:
+        console.log('Read Error: Pacing Mode not supported!');
+        return false;
+    }
+
+    const params = {};
+    params[pacingMode] = {};
+
+    params[pacingMode].lrl = readBuffer.readUInt8(3);
+    params[pacingMode].url = readBuffer.readUInt8(4);
+    params[pacingMode].apa = readBuffer.readUInt8(5)/10;
+    params[pacingMode].apw = readBuffer.readUInt8(6)/100;
+    params[pacingMode].as = readBuffer.readUInt8(7)/10;
+    params[pacingMode].vpa = readBuffer.readUInt8(8)/10;
+    params[pacingMode].vpw = readBuffer.readUInt8(9)/100;
+    params[pacingMode].vs = readBuffer.readUInt16LE(10)/100;
+    params[pacingMode].vrp = readBuffer.readUInt8(12)*10;
+    params[pacingMode].arp = readBuffer.readUInt8(13)*10;
+    params[pacingMode].hrl = readBuffer.readUInt8(14);
+    params[pacingMode].rs = readBuffer.readUInt8(15);
+
+    return params;
   }
 
   writeData(fnCode, pacingMode = 'NONE', data = {}) {
@@ -96,7 +157,7 @@ class Connection {
       if (err) {
         return console.log('Error: ', err.message);
       } else {
-        console.log('written buffer: ', this.dataBuffer);
+        console.log('Written Buffer: ', this.dataBuffer);
       }
     });
   }

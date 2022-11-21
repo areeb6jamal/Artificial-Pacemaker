@@ -9,9 +9,11 @@ const alertContainer = document.getElementById('container-alert');
 const dsnInput = document.getElementById('input-dsn');
 const dsnButton = document.getElementById('btn-dsn');
 const pacingModeInput = document.getElementById('select-pacing');
+const readButton = document.getElementById('btn-read');
 const slidersContainer = document.getElementById('container-sliders');
 const saveButton = document.getElementById('btn-save');
 const writeButton = document.getElementById('btn-write');
+const cancelButton = document.getElementById('btn-cancel');
 
 // Mapping between pacing modes and their parameters
 const pacingModesParams = {
@@ -80,6 +82,7 @@ connectButton.addEventListener('click', async () => {
           connectButton.className = 'btn btn-danger';
           connectButton.innerText = 'Disconnect Device';
           connectButton.disabled = false;
+          readButton.disabled = false;
           writeButton.disabled = pacingModeInput.value === 'none' ? true : false;
         }, 2.8 * 1000);
       } else {
@@ -97,10 +100,17 @@ const serialConnectionClosed = () => {
   customAlert('warning', `Device S/N:${currentUser.data.dsn} disconnected`);
   connectButton.className = 'btn btn-success';
   connectButton.innerText = 'Connect Device';
+  readButton.disabled = true;
   writeButton.disabled = true;
 };
 
-const selectPacingMode = async () => {
+const selectPacingMode = async (_event, presetParams = null) => {
+  if (presetParams) {
+    pacingModeInput.value = Object.keys(presetParams)[0];
+  } else {
+    presetParams = currentUser.data.params;
+  }
+
   slidersContainer.innerHTML = '';
   const selectedMode = pacingModeInput.value.toUpperCase();
 
@@ -108,9 +118,9 @@ const selectPacingMode = async () => {
     const config = paramConfigs[param.toUpperCase()];
     let value = config[3]; // default value
 
-    if (currentUser.data.params && currentUser.data.params[pacingModeInput.value]) {
-      // If a value is already stored in database, use it instead of the default
-      const v = currentUser.data.params[pacingModeInput.value][param];
+    if (presetParams && presetParams[pacingModeInput.value]) {
+      // If a value is already stored in database or received from pacemaker, use it instead of the default
+      const v = presetParams[pacingModeInput.value][param];
       if (v !== undefined) {
         value = v;
       }
@@ -131,9 +141,17 @@ const selectPacingMode = async () => {
 
 pacingModeInput.addEventListener('input', selectPacingMode);
 window.addEventListener('load', selectPacingMode);
+serialConnection.receiveParamsHandler = selectPacingMode;
+
+readButton.addEventListener('click', async () => {
+  //serialConnection.writeData('echo');
+
+  // For testing purposes
+  serialConnection.readData(serialConnection.dataBuffer);
+});
 
 saveButton.addEventListener('click', async () => {
-  params = {};
+  const params = {};
 
   const selectedMode = pacingModeInput.value.toUpperCase();
   pacingModesParams[selectedMode].forEach(param => {
@@ -149,8 +167,7 @@ saveButton.addEventListener('click', async () => {
 });
 
 writeButton.addEventListener('click', async () => {
-  console.log('writeButton clicked...');
-  params = {};
+  const params = {};
 
   const selectedMode = pacingModeInput.value.toUpperCase();
   pacingModesParams[selectedMode].forEach(param => {
@@ -159,6 +176,11 @@ writeButton.addEventListener('click', async () => {
   });
 
   serialConnection.writeData('pparams', selectedMode, params);
+});
+
+cancelButton.addEventListener('click', () => {
+  pacingModeInput.value = 'none';
+  selectPacingMode();
 });
 
 function createParameterInput(param, config, value) {
