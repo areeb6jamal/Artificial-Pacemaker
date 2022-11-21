@@ -1,8 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow } = require('electron')
 const path = require('path')
-const bcrypt = require('bcrypt')
-
-const saltRounds = 10
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,27 +9,16 @@ function createWindow() {
     center: true,
     icon: 'assets/mcmaster-small.png',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      nodeIntegration: true, // to allow require
+      contextIsolation: false, // allow serialport use with Electron 12+
+      //preload: path.join(__dirname, 'preload.js')
     }
   })
 
   win.loadFile('index.html')
 }
 
-async function bcryptHash(_channel, plaintextPassword) {
-  // Hash password
-  return bcrypt.hashSync(plaintextPassword, saltRounds)
-}
-
-async function bcryptCompare(_channel, plaintextPassword, hash) {
-  // Compare plaintext password with hash from database
-  return bcrypt.compareSync(plaintextPassword, hash);
-}
-
 app.whenReady().then(() => {
-  ipcMain.handle('bcryptHash', bcryptHash)
-  ipcMain.handle('bcryptCompare', bcryptCompare)
-
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

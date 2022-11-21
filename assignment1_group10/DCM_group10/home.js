@@ -1,3 +1,6 @@
+const User = require('./models/user.js');
+const Connection = require('./connection.js');
+
 const userItem = document.getElementById('itm-user');
 const logoutItem = document.getElementById('itm-logout');
 const connectButton = document.getElementById('btn-connect');
@@ -5,10 +8,10 @@ const alertContainer = document.getElementById('container-alert');
 
 const dsnInput = document.getElementById('input-dsn');
 const dsnButton = document.getElementById('btn-dsn');
-
 const pacingModeInput = document.getElementById('select-pacing');
 const slidersContainer = document.getElementById('container-sliders');
 const saveButton = document.getElementById('btn-save');
+const writeButton = document.getElementById('btn-write');
 
 // Mapping between pacing modes and their parameters
 const pacingModesParams = {
@@ -61,27 +64,41 @@ dsnButton.addEventListener('click', () => {
   }
 });
 
-let deviceConnected = false;
-connectButton.addEventListener('click', () => {
+const serialConnection = new Connection();
+connectButton.addEventListener('click', async () => {
   if (currentUser.data.dsn) {
-    if (deviceConnected) {
-      customAlert('warning', `Device (S/N ${currentUser.data.dsn}) disconnected`);
-      connectButton.className = 'btn btn-success';
-      connectButton.innerText = 'Connect Device';
-      deviceConnected = false;
+    if (serialConnection.isConnected) {
+      serialConnection.disconnect();
     } else {
       connectButton.disabled = true;
-      customAlert('warning', `Connecting Device (S/N ${currentUser.data.dsn}) please wait...`, 3.5);
-      setTimeout(() => {
-        customAlert('success', `Device (S/N ${currentUser.data.dsn}) successfully connected!`);
-        connectButton.className = 'btn btn-danger';
-        connectButton.innerText = 'Disconnect Device';
-        connectButton.disabled = false;
-        deviceConnected = true;
-      }, 3.8 * 1000);
+      customAlert('warning', `Connecting device S/N:${currentUser.data.dsn} please wait...`, 2.5);
+
+      if (await serialConnection.connect(currentUser.data.dsn)) {
+        serialConnection.serialPort.on('close', serialConnectionClosed);
+        setTimeout(() => {
+          customAlert('success', `Device S/N:${currentUser.data.dsn} successfully connected!`);
+          connectButton.className = 'btn btn-danger';
+          connectButton.innerText = 'Disconnect Device';
+          connectButton.disabled = false;
+          writeButton.disabled = pacingModeInput.value === 'none' ? true : false;
+        }, 2.8 * 1000);
+      } else {
+        setTimeout(() => {
+          customAlert('danger', `Unable to connect device S/N:${currentUser.data.dsn}. Check USB cable and serial number!`, 10);
+          connectButton.disabled = false;
+        }, 2.8 * 1000);
+      }
     }
   }
 });
+
+const serialConnectionClosed = () => {
+  serialConnection.disconnect();
+  customAlert('warning', `Device S/N:${currentUser.data.dsn} disconnected`);
+  connectButton.className = 'btn btn-success';
+  connectButton.innerText = 'Connect Device';
+  writeButton.disabled = true;
+};
 
 const selectPacingMode = async () => {
   slidersContainer.innerHTML = '';
@@ -105,8 +122,10 @@ const selectPacingMode = async () => {
 
   if (selectedMode === 'NONE') {
     saveButton.disabled = true;
+    writeButton.disabled = true;
   } else {
     saveButton.disabled = false;
+    writeButton.disabled = serialConnection.isConnected ? false : true;
   }
 };
 
@@ -127,6 +146,19 @@ saveButton.addEventListener('click', async () => {
   }
   currentUser.data.params[pacingModeInput.value] = params;
   currentUser.update();
+});
+
+writeButton.addEventListener('click', async () => {
+  console.log('writeButton clicked...');
+  params = {};
+
+  const selectedMode = pacingModeInput.value.toUpperCase();
+  pacingModesParams[selectedMode].forEach(param => {
+    const value = document.getElementById(`text-${param}`).value;
+    params[param] = value === '-' ? 0 : parseFloat(value);
+  });
+
+  serialConnection.writeData('pparams', selectedMode, params);
 });
 
 function createParameterInput(param, config, value) {
@@ -157,7 +189,7 @@ function createParameterInput(param, config, value) {
   // Add HTML code for the actual slider to the element
   slider.innerHTML += [
     `<input type="range" min="${range[0]}" max="${range[1]}" step="${range[2]}" value="${disabled ? config[3] : value}"`,
-    ` class="form-range" oninput="handleInput(this.id, '${param}', this.value)" id="input-range-${param}"${disabled ? ' disabled' : ''}>`, ''
+    ` class="form-range" oninput="handleInput(this, '${param}')" id="input-range-${param}"${disabled ? ' disabled' : ''}>`, ''
   ].join("\n");
 
   // Create HTML element for slider's text field and add it to the container
@@ -208,71 +240,91 @@ async function toggleSwitch(param) {
   }
 }
 
-async function handleInput(id, param, value) {
+function handleInput(slider, param) {
   const ranges = paramConfigs[param.toUpperCase()][2];
 
-  // If a second range exists, switch the step size when neccessary
-  if (ranges[1]) {
-    switch (param.toUpperCase()) {
-      case 'VPW': case 'APW':
-        switchStepSizePulseWidth(id, value);
-        break;
-      case 'VS':
-        switchStepSizePulseSensitivity(id, value);
-        break;
-      case 'RS':
-        switchStepSizeRateSmoothing(id, value);
-        break;
-      default: // LRL, APA, VPA, HRL
-        switchStepSize(id, ranges, value);
-        break;
-    }
+  // Handle the input depending on the specific parameter (i.e. switch the step size)
+  switch (param.toUpperCase()) {
+    case 'LRL':
+      checkBoundriesLRL(slider, ranges);
+      break;
+    case 'URL':
+      checkBoundriesURL(slider);
+      break;
+    case 'VPW': case 'APW':
+      switchStepSizePulseWidth(slider);
+      break;
+    case 'VS':
+      switchStepSizePulseSensitivity(slider);
+      break;
+    case 'RS':
+      switchStepSizeRateSmoothing(slider);
+      break;
+    default:
+      if (ranges[1]) {
+        // APA, VPA, HRL
+        switchStepSize(slider, ranges);
+      }
   }
 
   // Set the text field to the current value of the slider
-  document.getElementById(`text-${param}`).value = value;
+  document.getElementById(`text-${param}`).value = slider.value;
 }
 
-function switchStepSize(id, ranges, value) {
-  const slider = document.getElementById(id);
-  if (ranges[1][0] < value && value < ranges[1][1]) {
+function checkBoundriesLRL(lrlSlider, ranges) {
+  const urlSlider = document.getElementById('input-range-url');
+
+  if (parseInt(lrlSlider.value) > parseInt(urlSlider.value)) {
+    lrlSlider.value = urlSlider.value;
+  } else {
+    switchStepSize(lrlSlider, ranges);
+  }
+}
+
+function checkBoundriesURL(urlSlider) {
+  const lrlSlider = document.getElementById('input-range-lrl');
+
+  if (parseInt(urlSlider.value) < parseInt(lrlSlider.value)) {
+    urlSlider.value = lrlSlider.value;
+  }
+}
+
+function switchStepSize(slider, ranges) {
+  if (ranges[1][0] < slider.value && slider.value < ranges[1][1]) {
     slider.step = ranges[1][2];
   } else {
     slider.step = ranges[0][2];
   }
 }
 
-function switchStepSizePulseWidth(id, value) {
-  const slider = document.getElementById(id);
-  if (value == 0.1) {
+function switchStepSizePulseWidth(slider) {
+  if (slider.value == 0.1) {
     slider.step = 0.05;
     slider.min = 0.05;
-  } else if (value == 0.15) {
+  } else if (slider.value == 0.15) {
     slider.step = 0.1;
     slider.min = 0.1;
     slider.value += 0.05;
   }
 }
 
-function switchStepSizePulseSensitivity(id, value) {
-  const slider = document.getElementById(id);
-  if (value == 1) {
+function switchStepSizePulseSensitivity(slider) {
+  if (slider.value == 1) {
     slider.step = 0.25;
     slider.min = 0.25;
-  } else if (value == 1.25) {
+  } else if (slider.value == 1.25) {
     slider.step = 0.5;
     slider.min = 0.5;
     slider.value += 0.25;
   }
 }
 
-function switchStepSizeRateSmoothing(id, value) {
-  const slider = document.getElementById(id);
-  if (value == 21) {
+function switchStepSizeRateSmoothing(slider) {
+  if (slider.value == 21) {
     slider.step = 5;
     slider.min = 5;
     slider.max = 25;
-  } else if (value == 20) {
+  } else if (slider.value == 20) {
     slider.step = 3;
     slider.min = 3;
     slider.max = 24;

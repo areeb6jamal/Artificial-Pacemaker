@@ -1,4 +1,7 @@
+const bcrypt = require('bcrypt');
+
 let highestUserId = -1;
+const saltRounds = 10;
 
 class User {
   constructor(id, username, email, password, data = {}) {
@@ -9,7 +12,7 @@ class User {
     this.data = data;
   }
 
-  async register() {
+  register() {
     if (User.getUserByUsername(this.username) != null) {
       return false;
     }
@@ -20,7 +23,7 @@ class User {
     this.id = ++highestUserId;
 
     // Hash the plaintext password
-    this.password = await window.eAPI.bcryptHash(this.password);
+    this.password = bcrypt.hashSync(this.password, saltRounds);
 
     // Save user in local storage
     localStorage.setItem(this.username, JSON.stringify([this.id,
@@ -29,9 +32,8 @@ class User {
     return true;
   }
 
-  async login(plaintextPassword) {
-    const result = await window.eAPI.bcryptCompare(plaintextPassword, this.password);
-    if (result === true) {
+  login(plaintextPassword) {
+    if (bcrypt.compareSync(plaintextPassword, this.password)) {
       User.currentUser = this;
       return true;
     } else {
@@ -102,3 +104,5 @@ class User {
     return localStorage.length;
   }
 }
+
+module.exports = User;

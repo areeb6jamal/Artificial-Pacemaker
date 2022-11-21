@@ -1,3 +1,5 @@
+const User = require('./models/user.js');
+
 const loginForm = document.getElementById("login-form");
 const loginTabButton = document.getElementById("btn-login-tab");
 const registerForm = document.getElementById("register-form");
@@ -23,7 +25,7 @@ loginTabButton.addEventListener('click', () => {
   button.style.left = "0px";
 });
 
-registerButton.addEventListener('click', async () => {
+registerButton.addEventListener('click', () => {
   const user = new User(-1, registerUsernameInput.value,
     registerEmailInput.value, registerPasswordInput.value);
 
@@ -32,26 +34,39 @@ registerButton.addEventListener('click', async () => {
     return;
   }
 
-  const registerResult = await user.register();
+  const registerResult = user.register();
   if (registerResult === false) {
     alert('Error: Username "' + user.username + '" already exists!');
+    registerUsernameInput.focus();
   }
 });
 
-loginButton.addEventListener('click', async () => {
+registerForm.addEventListener('keypress', e => {
+  if (e.key === 'Enter') registerButton.click();
+});
+
+loginButton.addEventListener('click', () => {
   const user = User.getUserByUsername(loginUsernameInput.value);
   if (user === null) {
     alert("Error: Username does not exist!");
+    loginUsernameInput.focus();
+    loginPasswordInput.value = '';
     return;
   }
 
   console.log(user);
-  const loginResult = await user.login(loginPasswordInput.value);
+  const loginResult = user.login(loginPasswordInput.value);
   if (loginResult) {
     window.location.href = "home.html";
   } else {
     alert("Error: Password is not correct!");
+    loginPasswordInput.value = '';
+    loginPasswordInput.focus();
   }
+});
+
+loginForm.addEventListener('keypress', e => {
+  if (e.key === 'Enter') loginButton.click();
 });
 
 loginTabButton.click();
