@@ -2,7 +2,14 @@ const { SerialPort } = require('serialport');
 
 // Mapping between pacing modes and their hex value
 const pacingModeHex = {
-  NONE: 0x00, AOO: 0x01, VOO: 0x02, VVI: 0x03
+  NONE: 0x00,
+  AOO: 0x01,
+  VOO: 0x02,
+  VVI: 0x03,
+  AOOR: 0x04,
+  VOOR: 0x05,
+  AAIR: 0x06,
+  VVIR: 0x07
 };
 
 // Mapping between fnCodes and their hex value
@@ -13,7 +20,7 @@ const fnCodeHex = {
 class Connection {
   constructor() {
     this.serialPort = null;
-    this.dataBuffer = Buffer.alloc(16);
+    this.dataBuffer = Buffer.alloc(21);
     this.receiveParamsHandler = null;
   }
 
@@ -99,6 +106,18 @@ class Connection {
       case pacingModeHex.VVI:
         pacingMode = 'vvi';
         break;
+      case pacingModeHex.AOOR:
+        pacingMode = 'aoor';
+        break;
+      case pacingModeHex.VOOR:
+        pacingMode = 'voor';
+        break;
+      case pacingModeHex.AAIR:
+        pacingMode = 'aair';
+        break;
+      case pacingModeHex.VVIR:
+        pacingMode = 'vvir';
+        break;
       default:
         console.log('Read Error: Pacing Mode not supported!');
         return false;
@@ -109,16 +128,20 @@ class Connection {
 
     params[pacingMode].lrl = readBuffer.readUInt8(3);
     params[pacingMode].url = readBuffer.readUInt8(4);
-    params[pacingMode].apa = readBuffer.readUInt8(5)/10;
-    params[pacingMode].apw = readBuffer.readUInt8(6)/100;
-    params[pacingMode].as = readBuffer.readUInt8(7)/10;
-    params[pacingMode].vpa = readBuffer.readUInt8(8)/10;
+    params[pacingMode].msr = readBuffer.readUInt8(5);
+    params[pacingMode].apa = readBuffer.readUInt8(6)/10;
+    params[pacingMode].vpa = readBuffer.readUInt8(7)/10;
+    params[pacingMode].apw = readBuffer.readUInt8(8)/100;
     params[pacingMode].vpw = readBuffer.readUInt8(9)/100;
-    params[pacingMode].vs = readBuffer.readUInt16LE(10)/100;
-    params[pacingMode].vrp = readBuffer.readUInt8(12)*10;
-    params[pacingMode].arp = readBuffer.readUInt8(13)*10;
-    params[pacingMode].hrl = readBuffer.readUInt8(14);
-    params[pacingMode].rs = readBuffer.readUInt8(15);
+    params[pacingMode].as = readBuffer.readUInt16LE(10)/100;
+    params[pacingMode].vs = readBuffer.readUInt16LE(12)/100;
+    params[pacingMode].vrp = readBuffer.readUInt8(14)*10;
+    params[pacingMode].arp = readBuffer.readUInt8(15)*10;
+    params[pacingMode].pvarp = readBuffer.readUInt8(16)*10;
+    params[pacingMode].at = readBuffer.readUInt8(17);
+    params[pacingMode].rnt = readBuffer.readUInt8(18);
+    params[pacingMode].rf = readBuffer.readUInt8(19);
+    params[pacingMode].ryt = readBuffer.readUInt8(20);
 
     return params;
   }
@@ -131,7 +154,7 @@ class Connection {
       return false;
     }
 
-    this.dataBuffer = Buffer.alloc(16);
+    this.dataBuffer = Buffer.alloc(21);
     this.dataBuffer[0] = 0x10; // SYNC
     this.dataBuffer[1] = fnCodeHex[fnCode];
 
@@ -140,18 +163,22 @@ class Connection {
       this.dataBuffer[2] = pacingModeHex[pacingMode];
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'lrl') ? data.lrl : 0, 3);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'url') ? data.url : 0, 4);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'apa') ? data.apa*10 : 0, 5);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'apw') ? data.apw*100 : 0, 6);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'as') ? data.as*10 : 0, 7);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vpa') ? data.vpa*10 : 0, 8);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'msr') ? data.msr : 0, 5);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'apa') ? data.apa*10 : 0, 6);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vpa') ? data.vpa*10 : 0, 7);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'apw') ? data.apw*100 : 0, 8);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vpw') ? data.vpw*100 : 0, 9);
-      this.dataBuffer.writeUInt16LE(Object.hasOwn(data, 'vs') ? data.vs*100 : 0, 10);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vrp') ? data.vrp/10 : 0, 12);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'arp') ? data.arp/10 : 0, 13);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'hrl') ? data.hrl : 0, 14);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'rs') ? data.rs : 0, 15);
+      this.dataBuffer.writeUInt16LE(Object.hasOwn(data, 'as') ? data.as*100 : 0, 10);
+      this.dataBuffer.writeUInt16LE(Object.hasOwn(data, 'vs') ? data.vs*100 : 0, 12);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vrp') ? data.vrp/10 : 0, 14);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'arp') ? data.arp/10 : 0, 15);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'pvarp') ? data.pvarp/10 : 0, 16);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'at') ? data.at : 0, 17);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'rnt') ? data.rnt : 0, 18);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'rf') ? data.rf : 0, 19);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'ryt') ? data.ryt : 0, 20);
     }
-    //this.dataBuffer[16] = 0x00; // ChkSum
+    //this.dataBuffer[21] = 0x00; // ChkSum
 
     this.serialPort.write(this.dataBuffer, err => {
       if (err) {

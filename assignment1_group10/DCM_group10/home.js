@@ -18,9 +18,13 @@ const cancelButton = document.getElementById('btn-cancel');
 // Mapping between pacing modes and their parameters
 const pacingModesParams = {
   NONE: [],
-  AOO: ['lrl', 'url', 'apa', 'apw'],
-  VOO: ['lrl', 'url', 'vpa', 'vpw'],
-  VVI: ['lrl', 'url', 'vpa', 'vpw', 'vs', 'vrp', 'hrl', 'rs']
+  AOO:  ['lrl', 'url', 'apa', 'apw'],
+  VOO:  ['lrl', 'url', 'vpa', 'vpw'],
+  VVI:  ['lrl', 'url', 'vpa', 'vpw', 'vs', 'vrp'],
+  AOOR: ['lrl', 'url', 'msr', 'apa', 'apw', 'at', 'rnt', 'rf', 'ryt'],
+  VOOR: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'at', 'rnt', 'rf', 'ryt'],
+  AAIR: ['lrl', 'url', 'msr', 'apa', 'apw', 'as', 'arp', 'pvarp', 'at', 'rnt', 'rf', 'ryt'],
+  VVIR: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'vs', 'vrp', 'at', 'rnt', 'rf', 'ryt']
 };
 
 // This map sets the name, unit, range, increment and default value for the parameters
@@ -29,15 +33,31 @@ const pacingModesParams = {
 const paramConfigs = {
   LRL: ['Lower Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 60],
   URL: ['Upper Rate Limit', 'ppm', [[50, 175, 5]], 120],
+  MSR: ['Maximum Sensor Rate', 'ppm', [[50, 175, 5]], 120],
   APA: ['Atrial Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
   VPA: ['Ventricular Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
   APW: ['Atrial Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
   VPW: ['Ventricular Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
+  AS:  ['Atrial Sensitivity', 'mV', [[0.5, 10, 0.5], []], 2.5],
   VS:  ['Ventricular Sensitivity', 'mV', [[0.5, 10, 0.5], []], 2.5],
   VRP: ['Ventricular Refractory Period (VRP)', 'ms', [[150, 500, 10]], 320],
   ARP: ['Atrial Refractory Period (ARP)', 'ms', [[150, 500, 10]], 250],
-  HRL: ['Hysteresis Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 0, true],
-  RS:  ['Rate Smoothing', '%', [[3, 24, 3], []], 0, true]
+  PVARP: ['Post Ventricular Atrial Refractory Period (PVARP)', 'ms', [[150, 500, 10]], 250],
+  AT:  ['Activity Threshold', 'Thres', [[7, 49, 7]], 28],
+  RNT: ['Reaction Time', 'sec', [[10, 50, 10]], 30],
+  RF:  ['Response Factor', 'X', [[1, 16, 1]], 8],
+  RYT: ['Recovery Time', 'min', [[2, 16, 1]], 5]
+};
+
+// Mapping between AT values and their names
+const activityThresValues = {
+  '7': 'V-Low',
+  '14': 'Low',
+  '21': 'Med-Low',
+  '28': 'Med',
+  '35': 'Med-High',
+  '42': 'High',
+  '49': 'V-High'
 };
 
 let currentUser = User.currentUser;
@@ -155,8 +175,12 @@ saveButton.addEventListener('click', async () => {
 
   const selectedMode = pacingModeInput.value.toUpperCase();
   pacingModesParams[selectedMode].forEach(param => {
-    const value = document.getElementById(`text-${param}`).value;
-    params[param] = value === '-' ? 0 : parseFloat(value);
+    if (param === 'at') {
+      params[param] = parseInt(document.getElementById(`input-range-${param}`).value);
+    } else {
+      const value = document.getElementById(`text-${param}`).value;
+      params[param] = value === '-' ? 0 : parseFloat(value);
+    }
   });
 
   if (!currentUser.data.params) {
@@ -171,8 +195,12 @@ writeButton.addEventListener('click', async () => {
 
   const selectedMode = pacingModeInput.value.toUpperCase();
   pacingModesParams[selectedMode].forEach(param => {
-    const value = document.getElementById(`text-${param}`).value;
-    params[param] = value === '-' ? 0 : parseFloat(value);
+    if (param === 'at') {
+      params[param] = parseInt(document.getElementById(`input-range-${param}`).value);
+    } else {
+      const value = document.getElementById(`text-${param}`).value;
+      params[param] = value === '-' ? 0 : parseFloat(value);
+    }
   });
 
   serialConnection.writeData('pparams', selectedMode, params);
@@ -218,6 +246,9 @@ function createParameterInput(param, config, value) {
   const sliderText = document.createElement('div');
   slidersContainer.appendChild(sliderText);
   sliderText.className = 'col-md-3';
+  if (param === 'at') {
+    value = activityThresValues[value];
+  }
 
   sliderText.innerHTML = [
     `<label for="text-${param}" class="form-label"><br></label>`,
@@ -276,21 +307,22 @@ function handleInput(slider, param) {
     case 'VPW': case 'APW':
       switchStepSizePulseWidth(slider);
       break;
-    case 'VS':
+    case 'VS': case 'AS':
       switchStepSizePulseSensitivity(slider);
-      break;
-    case 'RS':
-      switchStepSizeRateSmoothing(slider);
       break;
     default:
       if (ranges[1]) {
-        // APA, VPA, HRL
+        // APA, VPA
         switchStepSize(slider, ranges);
       }
   }
 
   // Set the text field to the current value of the slider
-  document.getElementById(`text-${param}`).value = slider.value;
+  if (param === 'at') {
+    document.getElementById(`text-${param}`).value = activityThresValues[slider.value];
+  } else {
+    document.getElementById(`text-${param}`).value = slider.value;
+  }
 }
 
 function checkBoundriesLRL(lrlSlider, ranges) {
@@ -338,18 +370,5 @@ function switchStepSizePulseSensitivity(slider) {
     slider.step = 0.5;
     slider.min = 0.5;
     slider.value += 0.25;
-  }
-}
-
-function switchStepSizeRateSmoothing(slider) {
-  if (slider.value == 21) {
-    slider.step = 5;
-    slider.min = 5;
-    slider.max = 25;
-  } else if (slider.value == 20) {
-    slider.step = 3;
-    slider.min = 3;
-    slider.max = 24;
-    slider.value += 1;
   }
 }
