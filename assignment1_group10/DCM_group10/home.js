@@ -20,6 +20,7 @@ const pacingModesParams = {
   NONE: [],
   AOO:  ['lrl', 'url', 'apa', 'apw'],
   VOO:  ['lrl', 'url', 'vpa', 'vpw'],
+  AAI:  ['lrl', 'url', 'apa', 'apw', 'as', 'arp', 'pvarp'],
   VVI:  ['lrl', 'url', 'vpa', 'vpw', 'vs', 'vrp'],
   AOOR: ['lrl', 'url', 'msr', 'apa', 'apw', 'at', 'rnt', 'rf', 'ryt'],
   VOOR: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'at', 'rnt', 'rf', 'ryt'],

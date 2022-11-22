@@ -5,11 +5,12 @@ const pacingModeHex = {
   NONE: 0x00,
   AOO: 0x01,
   VOO: 0x02,
-  VVI: 0x03,
-  AOOR: 0x04,
-  VOOR: 0x05,
-  AAIR: 0x06,
-  VVIR: 0x07
+  AAI: 0x03,
+  VVI: 0x04,
+  AOOR: 0x05,
+  VOOR: 0x06,
+  AAIR: 0x07,
+  VVIR: 0x08
 };
 
 // Mapping between fnCodes and their hex value
@@ -20,7 +21,7 @@ const fnCodeHex = {
 class Connection {
   constructor() {
     this.serialPort = null;
-    this.dataBuffer = Buffer.alloc(21);
+    this.dataBuffer = Buffer.alloc(22);
     this.receiveParamsHandler = null;
   }
 
@@ -32,7 +33,7 @@ class Connection {
       // Connect to the device with matching serial number
       ports.forEach(device => {
         if (device.serialNumber === serialNumber && device.manufacturer === 'SEGGER') {
-          this.serialPort = new SerialPort({ path: device.path, baudRate: 115200 }, err => {
+          this.serialPort = new SerialPort({ path: device.path, baudRate: 57600 }, err => {
             if (err) {
               console.log('Connect Error: ', err.message);
               return this.disconnect();
@@ -94,7 +95,7 @@ class Connection {
     }
   }
 
-  _readParamsFromBuffer(readBuffer = Buffer.alloc(16)) {
+  _readParamsFromBuffer(readBuffer = Buffer.alloc(22)) {
     let pacingMode;
     switch(readBuffer[2]) {
       case pacingModeHex.AOO:
@@ -102,6 +103,9 @@ class Connection {
         break;
       case pacingModeHex.VOO:
         pacingMode = 'voo';
+        break;
+      case pacingModeHex.AAI:
+        pacingMode = 'aai';
         break;
       case pacingModeHex.VVI:
         pacingMode = 'vvi';
@@ -135,13 +139,14 @@ class Connection {
     params[pacingMode].vpw = readBuffer.readUInt8(9)/100;
     params[pacingMode].as = readBuffer.readUInt16LE(10)/100;
     params[pacingMode].vs = readBuffer.readUInt16LE(12)/100;
-    params[pacingMode].vrp = readBuffer.readUInt8(14)*10;
-    params[pacingMode].arp = readBuffer.readUInt8(15)*10;
+    params[pacingMode].arp = readBuffer.readUInt8(14)*10;
+    params[pacingMode].vrp = readBuffer.readUInt8(15)*10;
     params[pacingMode].pvarp = readBuffer.readUInt8(16)*10;
     params[pacingMode].at = readBuffer.readUInt8(17);
     params[pacingMode].rnt = readBuffer.readUInt8(18);
     params[pacingMode].rf = readBuffer.readUInt8(19);
     params[pacingMode].ryt = readBuffer.readUInt8(20);
+    params[pacingMode].fad = readBuffer.readUInt8(21);
 
     return params;
   }
@@ -154,7 +159,7 @@ class Connection {
       return false;
     }
 
-    this.dataBuffer = Buffer.alloc(21);
+    this.dataBuffer = Buffer.alloc(22);
     this.dataBuffer[0] = 0x10; // SYNC
     this.dataBuffer[1] = fnCodeHex[fnCode];
 
@@ -170,13 +175,14 @@ class Connection {
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vpw') ? data.vpw*100 : 0, 9);
       this.dataBuffer.writeUInt16LE(Object.hasOwn(data, 'as') ? data.as*100 : 0, 10);
       this.dataBuffer.writeUInt16LE(Object.hasOwn(data, 'vs') ? data.vs*100 : 0, 12);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vrp') ? data.vrp/10 : 0, 14);
-      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'arp') ? data.arp/10 : 0, 15);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'arp') ? data.arp/10 : 0, 14);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'vrp') ? data.vrp/10 : 0, 15);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'pvarp') ? data.pvarp/10 : 0, 16);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'at') ? data.at : 0, 17);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'rnt') ? data.rnt : 0, 18);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'rf') ? data.rf : 0, 19);
       this.dataBuffer.writeUInt8(Object.hasOwn(data, 'ryt') ? data.ryt : 0, 20);
+      this.dataBuffer.writeUInt8(Object.hasOwn(data, 'fad') ? data.fad : 0, 21);
     }
     //this.dataBuffer[21] = 0x00; // ChkSum
 
