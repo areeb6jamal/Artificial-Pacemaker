@@ -35,12 +35,12 @@ const paramConfigs = {
   LRL: ['Lower Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 60],
   URL: ['Upper Rate Limit', 'ppm', [[50, 175, 5]], 120],
   MSR: ['Maximum Sensor Rate', 'ppm', [[50, 175, 5]], 120],
-  APA: ['Atrial Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
-  VPA: ['Ventricular Pulse Amplitude', 'V', [[0.5, 7.0, 0.5], [0.5, 3.2, 0.1]], 3.5, true],
-  APW: ['Atrial Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
-  VPW: ['Ventricular Pulse Width', 'ms', [[0.1, 1.9, 0.1], []], 0.4],
-  AS:  ['Atrial Sensitivity', 'mV', [[0.5, 10, 0.5], []], 2.5],
-  VS:  ['Ventricular Sensitivity', 'mV', [[0.5, 10, 0.5], []], 2.5],
+  APA: ['Atrial Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
+  VPA: ['Ventricular Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
+  APW: ['Atrial Pulse Width', 'ms', [[1, 30, 1]], 1],
+  VPW: ['Ventricular Pulse Width', 'ms', [[1, 30, 1]], 1],
+  AS:  ['Atrial Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
+  VS:  ['Ventricular Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
   VRP: ['Ventricular Refractory Period (VRP)', 'ms', [[150, 500, 10]], 320],
   ARP: ['Atrial Refractory Period (ARP)', 'ms', [[150, 500, 10]], 250],
   PVARP: ['Post Ventricular Atrial Refractory Period (PVARP)', 'ms', [[150, 500, 10]], 250],
@@ -172,17 +172,7 @@ readButton.addEventListener('click', async () => {
 });
 
 saveButton.addEventListener('click', async () => {
-  const params = {};
-
-  const selectedMode = pacingModeInput.value.toUpperCase();
-  pacingModesParams[selectedMode].forEach(param => {
-    if (param === 'at') {
-      params[param] = parseInt(document.getElementById(`input-range-${param}`).value);
-    } else {
-      const value = document.getElementById(`text-${param}`).value;
-      params[param] = value === '-' ? 0 : parseFloat(value);
-    }
-  });
+  const params = getParamsFromInput();
 
   if (!currentUser.data.params) {
     currentUser.data.params = {};
@@ -192,6 +182,18 @@ saveButton.addEventListener('click', async () => {
 });
 
 writeButton.addEventListener('click', async () => {
+  const params = getParamsFromInput();
+  const selectedMode = pacingModeInput.value.toUpperCase();
+
+  serialConnection.writeData('pparams', selectedMode, params);
+});
+
+cancelButton.addEventListener('click', () => {
+  pacingModeInput.value = 'none';
+  selectPacingMode();
+});
+
+function getParamsFromInput() {
   const params = {};
 
   const selectedMode = pacingModeInput.value.toUpperCase();
@@ -204,13 +206,8 @@ writeButton.addEventListener('click', async () => {
     }
   });
 
-  serialConnection.writeData('pparams', selectedMode, params);
-});
-
-cancelButton.addEventListener('click', () => {
-  pacingModeInput.value = 'none';
-  selectPacingMode();
-});
+  return params;
+}
 
 function createParameterInput(param, config, value) {
   const range = config[2][0]; // range the input must cover
@@ -295,31 +292,21 @@ async function toggleSwitch(param) {
 }
 
 function handleInput(slider, param) {
-  const ranges = paramConfigs[param.toUpperCase()][2];
+  const paramU = param.toUpperCase();
+  const ranges = paramConfigs[paramU][2];
 
-  // Handle the input depending on the specific parameter (i.e. switch the step size)
-  switch (param.toUpperCase()) {
+  // Handle the input depending on the specific parameter
+  switch (paramU) {
     case 'LRL':
       checkBoundriesLRL(slider, ranges);
       break;
     case 'URL':
       checkBoundriesURL(slider);
       break;
-    case 'VPW': case 'APW':
-      switchStepSizePulseWidth(slider);
-      break;
-    case 'VS': case 'AS':
-      switchStepSizePulseSensitivity(slider);
-      break;
-    default:
-      if (ranges[1]) {
-        // APA, VPA
-        switchStepSize(slider, ranges);
-      }
   }
 
   // Set the text field to the current value of the slider
-  if (param === 'at') {
+  if (paramU === 'AT') {
     document.getElementById(`text-${param}`).value = activityThresValues[slider.value];
   } else {
     document.getElementById(`text-${param}`).value = slider.value;
@@ -349,27 +336,5 @@ function switchStepSize(slider, ranges) {
     slider.step = ranges[1][2];
   } else {
     slider.step = ranges[0][2];
-  }
-}
-
-function switchStepSizePulseWidth(slider) {
-  if (slider.value == 0.1) {
-    slider.step = 0.05;
-    slider.min = 0.05;
-  } else if (slider.value == 0.15) {
-    slider.step = 0.1;
-    slider.min = 0.1;
-    slider.value += 0.05;
-  }
-}
-
-function switchStepSizePulseSensitivity(slider) {
-  if (slider.value == 1) {
-    slider.step = 0.25;
-    slider.min = 0.25;
-  } else if (slider.value == 1.25) {
-    slider.step = 0.5;
-    slider.min = 0.5;
-    slider.value += 0.25;
   }
 }
