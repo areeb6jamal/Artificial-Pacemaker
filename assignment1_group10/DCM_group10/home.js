@@ -164,12 +164,7 @@ pacingModeInput.addEventListener('input', selectPacingMode);
 window.addEventListener('load', selectPacingMode);
 serialConnection.receiveParamsHandler = selectPacingMode;
 
-readButton.addEventListener('click', async () => {
-  //serialConnection.writeData('echo');
-
-  // For testing purposes
-  serialConnection.readData(serialConnection.dataBuffer);
-});
+readButton.addEventListener('click', () => serialConnection.writeData('echo'));
 
 saveButton.addEventListener('click', async () => {
   const params = getParamsFromInput();

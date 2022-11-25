@@ -33,7 +33,7 @@ class Connection {
       // Connect to the device with matching serial number
       ports.forEach(device => {
         if (device.serialNumber === serialNumber && device.manufacturer === 'SEGGER') {
-          this.serialPort = new SerialPort({ path: device.path, baudRate: 57600 }, err => {
+          this.serialPort = new SerialPort({ path: device.path, baudRate: 115200 }, err => {
             if (err) {
               console.log('Connect Error: ', err.message);
               return this.disconnect();
@@ -48,7 +48,7 @@ class Connection {
       console.log('Connect success!');
       console.log(this.serialPort);
 
-      this.serialPort.on('readable', this.readData);
+      this.serialPort.on('readable', () => this.readData());
       this.serialPort.on('close', () => this.serialPort = null);
 
       return true;
@@ -67,9 +67,18 @@ class Connection {
     }
   }
 
-  readData(readBuffer = this.serialPort.read()) {
-    console.log('Read Data: ', readBuffer);
+  readData() {
+    if (!this.isConnected) {
+      console.log('Read Error: not connected!');
+      return false;
+    }
 
+    const readBuffer = this.serialPort.read(20);
+    if (!readBuffer) {
+      return false;
+    }
+
+    console.log('Read Data: ', readBuffer);
     if (readBuffer[0] !== 0x10) {
       console.log('Read Error: SYNC');
       return false;
@@ -95,7 +104,7 @@ class Connection {
     }
   }
 
-  _readParamsFromBuffer(readBuffer = Buffer.alloc(20)) {
+  _readParamsFromBuffer(readBuffer) {
     let pacingMode;
     switch(readBuffer[2]) {
       case pacingModeHex.AOO:
