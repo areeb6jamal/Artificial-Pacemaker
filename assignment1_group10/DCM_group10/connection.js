@@ -73,7 +73,7 @@ class Connection {
       return false;
     }
 
-    const readBuffer = this.serialPort.read(20);
+    const readBuffer = this.serialPort.read(74);
     if (!readBuffer) {
       return false;
     }
