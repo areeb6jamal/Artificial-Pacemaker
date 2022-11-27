@@ -19,43 +19,62 @@ const fnCodeHex = {
 };
 
 class Connection {
+  static SUCCESS = 1;
+  static SERIAL_NUM_MISMATCH = -1;
+  static ERROR = -2;
+
   constructor() {
     this.serialPort = null;
     this.dataBuffer = Buffer.alloc(20);
     this.receiveParamsHandler = null;
+    this.receiveEgramHandler = null;
   }
 
   async connect(serialNumber) {
+    let returnValue = Connection.ERROR;
+
     await SerialPort.list().then((ports, err) => {
-      if (err) return console.log('PortsList Error: ', err.message);
-      console.log('Ports: ', ports);
+      if (err) {
+        console.log('PortsList Error: ', err.message);
+        returnValue = Connection.ERROR;
+        return;
+      } else {
+        console.log('Ports: ', ports);
+      }
 
       // Connect to the device with matching serial number
       ports.forEach(device => {
-        if (device.serialNumber === serialNumber && device.manufacturer === 'SEGGER') {
-          this.serialPort = new SerialPort({ path: device.path, baudRate: 115200 }, err => {
-            if (err) {
-              console.log('Connect Error: ', err.message);
-              return this.disconnect();
-            }
-          });
-          return;
+        if (device.manufacturer === 'SEGGER') {
+          if (device.serialNumber === serialNumber) {
+            returnValue = Connection.SUCCESS;
+
+            this.serialPort = new SerialPort({ path: device.path, baudRate: 115200 }, err => {
+              if (err) {
+                console.log('Connect Error: ', err.message);
+                returnValue = Connection.ERROR;
+                this.disconnect();
+              }
+            });
+
+            return;
+          } else {
+            returnValue = Connection.SERIAL_NUM_MISMATCH;
+          }
         }
       });
     });
 
-    if (this.serialPort) {
+    if (returnValue === Connection.SUCCESS) {
       console.log('Connect success!');
       console.log(this.serialPort);
 
       this.serialPort.on('readable', () => this.readData());
       this.serialPort.on('close', () => this.serialPort = null);
-
-      return true;
     } else {
       console.log('Connect failed!');
-      return false;
     }
+
+    return returnValue;
   }
 
   disconnect() {
@@ -78,7 +97,6 @@ class Connection {
       return false;
     }
 
-    console.log('Read Data: ', readBuffer);
     if (readBuffer[0] !== 0x10) {
       console.log('Read Error: SYNC');
       return false;
@@ -95,7 +113,8 @@ class Connection {
         break;
 
       case fnCodeHex.egram:
-        // TODO: process egram data
+        const egramData = this._readEgramDataFromBuffer(readBuffer);
+        return this.receiveEgramHandler(egramData);
         break;
 
       default:
@@ -104,7 +123,25 @@ class Connection {
     }
   }
 
+  _readEgramDataFromBuffer(readBuffer) {
+    const egramData = {
+      atrial: [],
+      ventrical: []
+    };
+
+    for (let offset = 2; offset <= 34; offset += 4) {
+      egramData.atrial.push(readBuffer.readFloatLE(offset));
+    }
+    for (let offset = 38; offset <= 70; offset += 4) {
+      egramData.ventrical.push(readBuffer.readFloatLE(offset));
+    }
+
+    return egramData;
+  }
+
   _readParamsFromBuffer(readBuffer) {
+    console.log('Read Params Data: ', readBuffer);
+
     let pacingMode;
     switch(readBuffer[2]) {
       case pacingModeHex.AOO:

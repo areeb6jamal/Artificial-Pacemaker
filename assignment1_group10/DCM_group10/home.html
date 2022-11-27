@@ -18,12 +18,18 @@
           <img src="./assets/mcmaster-small.png" alt="Logo" width="19" height="26" class="d-inline-block align-text-top">
           Pacemaker DCM
         </a>
+        <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
+        <button class="btn btn-secondary" id="btn-params" type="button">Parameters</button>
+        <p style="color:white;">_</p>
+        <button class="btn btn-secondary" id="btn-egram" type="button">EGRAM</button>
+        <p style="color:white;">_</p>
+        <button class="btn btn-secondary" id="btn-new-patient" type="button">New Patient</button>
+        <p style="color:white;">_</p>
+        <button class="btn btn-secondary" id="btn-about" type="button">About</button>
         <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
         <form class="d-flex" role="user">
-          <button id="btn-connect" class="btn btn-success" type="button" aria-expanded="false">
-            Connect Device
-          </button>
-          <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
+          <button id="btn-connect" class="btn btn-success" type="button" aria-expanded="false">Connect Device</button>
+          <p style="color:white;">_</p>
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               Account
@@ -46,48 +52,7 @@
             <div class="alert hide" role="alert"><div><br></div></div>
           </div>
 
-          <h2>Pacing Modes - Parameters</h2>
-          <p>Select a pacing mode below to start viewing and configuring the corresponding parameters.</p>
-          <br>
-          <div class="col-md-9">
-            <div class="input-group mb-3">
-              <span class="input-group-text">Device Serial Number</span>
-              <input type="text" id="input-dsn" class="form-control" aria-label="Serial Number" disabled>
-              <button class="btn btn-secondary" id="btn-dsn" type="button">Update</button>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="input-group mb-3">
-              <div class="form-floating">
-                <select class="form-select" id="select-pacing" aria-label="Pacing Mode select">
-                  <option value="none" selected>Select Pacing Mode</option>
-                  <option value="aoo">AOO</option>
-                  <option value="voo">VOO</option>
-                  <option value="aai">AAI</option>
-                  <option value="vvi">VVI</option>
-                  <option value="aoor">AOOR</option>
-                  <option value="voor">VOOR</option>
-                  <option value="aair">AAIR</option>
-                  <option value="vvir">VVIR</option>
-                </select>
-                  <label for="floatingSelect">Pacing Mode</label>
-              </div>
-              <button type="button" class="col btn btn-primary" id="btn-read" disabled>Read Parameters from Pacemaker</button>
-            </div>
-          </div>
-          <br>
-          <div class="row align-items-center" id="container-sliders"></div>
-          <div class="row container text-center">
-            <div class="col-md-3">
-              <button type="button" class="col btn btn-primary" id="btn-save" disabled>Save on DCM</button>
-            </div>
-            <div class="col-md-3">
-              <button type="button" class="col btn btn-primary" id="btn-write" disabled>Write to Pacemaker</button>
-            </div>
-            <div class="col-md-3">
-              <button type="button" class="col btn btn-danger" id="btn-cancel">CANCEL</button>
-            </div>
-          </div>
+          <div id="container-view"></div>
         </div>
       </div>
     </div>
@@ -95,7 +60,7 @@
 </main>
 
   <script src="./assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="./home.js"></script>
+  <script src="./controllers/home.js"></script>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="check-circle-fill" viewBox="0 0 16 16">
