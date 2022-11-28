@@ -69,4 +69,8 @@ loginForm.addEventListener('keypress', e => {
   if (e.key === 'Enter') loginButton.click();
 });
 
-loginTabButton.click();
+if (window.location.hash === '#register') {
+  registerTabButton.click();
+} else {
+  loginTabButton.click();
+}

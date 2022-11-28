@@ -2,15 +2,15 @@ const { SerialPort } = require('serialport');
 
 // Mapping between pacing modes and their hex value
 const pacingModeHex = {
-  NONE: 0x00,
-  AOO: 0x01,
-  VOO: 0x02,
-  AAI: 0x03,
-  VVI: 0x04,
-  AOOR: 0x05,
-  VOOR: 0x06,
-  AAIR: 0x07,
-  VVIR: 0x08
+  none: 0x00,
+  aoo: 0x01,
+  voo: 0x02,
+  aai: 0x03,
+  vvi: 0x04,
+  aoor: 0x05,
+  voor: 0x06,
+  aair: 0x07,
+  vvir: 0x08
 };
 
 // Mapping between fnCodes and their hex value
@@ -144,28 +144,28 @@ class Connection {
 
     let pacingMode;
     switch(readBuffer[2]) {
-      case pacingModeHex.AOO:
+      case pacingModeHex.aoo:
         pacingMode = 'aoo';
         break;
-      case pacingModeHex.VOO:
+      case pacingModeHex.voo:
         pacingMode = 'voo';
         break;
-      case pacingModeHex.AAI:
+      case pacingModeHex.aii:
         pacingMode = 'aai';
         break;
-      case pacingModeHex.VVI:
+      case pacingModeHex.vvi:
         pacingMode = 'vvi';
         break;
-      case pacingModeHex.AOOR:
+      case pacingModeHex.aoor:
         pacingMode = 'aoor';
         break;
-      case pacingModeHex.VOOR:
+      case pacingModeHex.voor:
         pacingMode = 'voor';
         break;
-      case pacingModeHex.AAIR:
+      case pacingModeHex.aair:
         pacingMode = 'aair';
         break;
-      case pacingModeHex.VVIR:
+      case pacingModeHex.vvir:
         pacingMode = 'vvir';
         break;
       default:

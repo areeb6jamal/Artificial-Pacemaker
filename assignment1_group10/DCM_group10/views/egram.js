@@ -9,8 +9,9 @@ class EgramView {
   }
 
   show() {
+    document.title = 'Pacemaker DCM · Electrocardiogram';
     this.viewContainer.innerHTML = [
-      '<h2>Electrocardiogram</h2>',
+      '<h2>Electrocardiogram (ECG)</h2>',
       '<br></br>'
     ].join("\n");
 

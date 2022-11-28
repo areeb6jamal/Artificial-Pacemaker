@@ -13,39 +13,46 @@ const userItem = document.getElementById('itm-user');
 const logoutItem = document.getElementById('itm-logout');
 const connectButton = document.getElementById('btn-connect');
 
+// Text to be displayed in the "About" tab of the GUI
+const aboutText =
+  'Application Model Number: 1.0\n' +
+  'Application Software Revision Number: 1.0.0\n' +
+  'DCM Serial Number: 001\n' +
+  'Institution Name: McMaster University';
+
 // Mapping between pacing modes and their parameters
 const pacingModesParams = {
-  NONE: [],
-  AOO:  ['lrl', 'url', 'apa', 'apw'],
-  VOO:  ['lrl', 'url', 'vpa', 'vpw'],
-  AAI:  ['lrl', 'url', 'apa', 'apw', 'as', 'arp', 'pvarp'],
-  VVI:  ['lrl', 'url', 'vpa', 'vpw', 'vs', 'vrp'],
-  AOOR: ['lrl', 'url', 'msr', 'apa', 'apw', 'at', 'rnt', 'rf', 'ryt'],
-  VOOR: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'at', 'rnt', 'rf', 'ryt'],
-  AAIR: ['lrl', 'url', 'msr', 'apa', 'apw', 'as', 'arp', 'pvarp', 'at', 'rnt', 'rf', 'ryt'],
-  VVIR: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'vs', 'vrp', 'at', 'rnt', 'rf', 'ryt']
+  none: [],
+  aoo:  ['lrl', 'url', 'apa', 'apw'],
+  voo:  ['lrl', 'url', 'vpa', 'vpw'],
+  aai:  ['lrl', 'url', 'apa', 'apw', 'as', 'arp', 'pvarp'],
+  vvi:  ['lrl', 'url', 'vpa', 'vpw', 'vs', 'vrp'],
+  aoor: ['lrl', 'url', 'msr', 'apa', 'apw', 'at', 'rnt', 'rf', 'ryt'],
+  voor: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'at', 'rnt', 'rf', 'ryt'],
+  aair: ['lrl', 'url', 'msr', 'apa', 'apw', 'as', 'arp', 'pvarp', 'at', 'rnt', 'rf', 'ryt'],
+  vvir: ['lrl', 'url', 'msr', 'vpa', 'vpw', 'vs', 'vrp', 'at', 'rnt', 'rf', 'ryt']
 };
 
 // This map sets the name, unit, range, increment and default value for the parameters
 // Some parameters have two ranges with different step sizes (see PACEMAKER.pdf)
 // mode: [name, unit, [[min, max, increment]], default, switch_on_off]
 const paramConfigs = {
-  LRL: ['Lower Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 60],
-  URL: ['Upper Rate Limit', 'ppm', [[50, 175, 5]], 120],
-  MSR: ['Maximum Sensor Rate', 'ppm', [[50, 175, 5]], 120],
-  APA: ['Atrial Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
-  VPA: ['Ventricular Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
-  APW: ['Atrial Pulse Width', 'ms', [[1, 30, 1]], 1],
-  VPW: ['Ventricular Pulse Width', 'ms', [[1, 30, 1]], 1],
-  AS:  ['Atrial Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
-  VS:  ['Ventricular Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
-  VRP: ['Ventricular Refractory Period (VRP)', 'ms', [[150, 500, 10]], 320],
-  ARP: ['Atrial Refractory Period (ARP)', 'ms', [[150, 500, 10]], 250],
-  PVARP: ['Post Ventricular Atrial Refractory Period (PVARP)', 'ms', [[150, 500, 10]], 250],
-  AT:  ['Activity Threshold', 'Thres', [[7, 49, 7]], 28],
-  RNT: ['Reaction Time', 'sec', [[10, 50, 10]], 30],
-  RF:  ['Response Factor', 'X', [[1, 16, 1]], 8],
-  RYT: ['Recovery Time', 'min', [[2, 16, 1]], 5]
+  lrl: ['Lower Rate Limit', 'ppm', [[30, 175, 5], [50, 90, 1]], 60],
+  url: ['Upper Rate Limit', 'ppm', [[50, 175, 5]], 120],
+  msr: ['Maximum Sensor Rate', 'ppm', [[50, 175, 5]], 120],
+  apa: ['Atrial Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
+  vpa: ['Ventricular Pulse Amplitude', 'V', [[0.1, 5.0, 0.1]], 5, true],
+  apw: ['Atrial Pulse Width', 'ms', [[1, 30, 1]], 1],
+  vpw: ['Ventricular Pulse Width', 'ms', [[1, 30, 1]], 1],
+  as:  ['Atrial Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
+  vs:  ['Ventricular Sensitivity', 'V', [[0, 5, 0.1]], 2.5],
+  vrp: ['Ventricular Refractory Period (VRP)', 'ms', [[150, 500, 10]], 320],
+  arp: ['Atrial Refractory Period (ARP)', 'ms', [[150, 500, 10]], 250],
+  pvarp: ['Post Ventricular Atrial Refractory Period (PVARP)', 'ms', [[150, 500, 10]], 250],
+  at:  ['Activity Threshold', 'Thres', [[7, 49, 7]], 28],
+  rnt: ['Reaction Time', 'sec', [[10, 50, 10]], 30],
+  rf:  ['Response Factor', 'X', [[1, 16, 1]], 8],
+  ryt: ['Recovery Time', 'min', [[2, 16, 1]], 5]
 };
 
 const paramsView = new ParamsView();
@@ -60,6 +67,7 @@ if (!currentUser) {
 userItem.textContent = currentUser.username;
 const dsn = currentUser.data.dsn ? currentUser.data.dsn : '';
 
+const aboutButtonClicked = () => alert(aboutText);
 const logoutClicked = () => {
   currentUser.logout();
   window.location.href = 'index.html';
@@ -67,7 +75,6 @@ const logoutClicked = () => {
 
 let egramRunning = false;
 let startTime = 0;
-
 const paramsButtonClicked = () => {
   if (egramRunning) {
     egramRunning = false;
@@ -99,8 +106,12 @@ const egramHandler = (egramData) => {
     Plotly.relayout(egramView.ventricalPlot, { xaxis: { title: 'Time (s)', range: [plotSeconds-5, plotSeconds] }});
   }
 };
-
 serialConnection.receiveEgramHandler = egramHandler;
+
+const newPatientButtonClicked = () => {
+  currentUser.logout();
+  window.location.href = 'index.html#register';
+};
 
 const connectButtonClicked = async () => {
   if (currentUser.data.dsn) {
@@ -120,6 +131,7 @@ const connectButtonClicked = async () => {
           connectButton.innerText = 'Disconnect Device';
           connectButton.disabled = false;
           paramsView.readButton.disabled = false;
+          paramsView.paceNowButton.disabled = false;
           paramsView.writeButton.disabled = paramsView.pacingModeInput.value === 'none' ? true : false;
           if (egramRunning) {
             serialConnection.writeData('egram');
@@ -144,9 +156,10 @@ const connectButtonClicked = async () => {
 const serialConnectionClosed = () => {
   serialConnection.disconnect();
   alertView.showAlert('warning', `Device S/N:${currentUser.data.dsn} disconnected`);
-  connectButton.className = 'btn btn-success';
+  connectButton.className = 'btn btn-outline-success';
   connectButton.innerText = 'Connect Device';
   paramsView.readButton.disabled = true;
+  paramsView.paceNowButton.disabled = true;
   paramsView.writeButton.disabled = true;
 };
 
@@ -170,15 +183,15 @@ const selectPacingMode = async (_event, presetParams = null) => {
   }
 
   paramsView.slidersContainer.innerHTML = '';
-  const selectedMode = paramsView.pacingModeInput.value.toUpperCase();
+  const selectedMode = paramsView.pacingModeInput.value;
 
   pacingModesParams[selectedMode].forEach(param => {
-    const config = paramConfigs[param.toUpperCase()];
+    const config = paramConfigs[param];
     let value = config[3]; // default value
 
-    if (presetParams && presetParams[paramsView.pacingModeInput.value]) {
+    if (presetParams && presetParams[selectedMode]) {
       // If a value is already stored in database or received from pacemaker, use it instead of the default
-      const v = presetParams[paramsView.pacingModeInput.value][param];
+      const v = presetParams[selectedMode][param];
       if (v !== undefined) {
         value = v;
       }
@@ -188,7 +201,7 @@ const selectPacingMode = async (_event, presetParams = null) => {
     paramsView.createParameterInput(param, config, value);
   });
 
-  if (selectedMode === 'NONE') {
+  if (selectedMode === 'none') {
     paramsView.saveButton.disabled = true;
     paramsView.writeButton.disabled = true;
   } else {
@@ -198,6 +211,19 @@ const selectPacingMode = async (_event, presetParams = null) => {
 };
 
 const readButtonClicked = () => serialConnection.writeData('echo');
+
+const paceNowButtonClicked = () => {
+  const paceNowParams = {
+    lrl: 65,
+    url: 65,
+    vpa: 5,
+    vpw: 1,
+    vs: 0.1,
+    vrp: 320
+  };
+
+  serialConnection.writeData('pparams', 'vvi', paceNowParams);
+};
 
 const saveButtonClicked = async () => {
   const params = getParamsFromInput();
@@ -211,8 +237,7 @@ const saveButtonClicked = async () => {
 
 const writeButtonClicked = async () => {
   const params = getParamsFromInput();
-  const selectedMode = paramsView.pacingModeInput.value.toUpperCase();
-
+  const selectedMode = paramsView.pacingModeInput.value;
   serialConnection.writeData('pparams', selectedMode, params);
 };
 
@@ -224,13 +249,16 @@ const cancelButtonClicked = () => {
 
 // Register event listeners/handler
 connectButton.addEventListener('click', connectButtonClicked);
+aboutButton.addEventListener('click', aboutButtonClicked);
 logoutItem.addEventListener('click', logoutClicked);
 paramsButton.addEventListener('click', paramsButtonClicked);
 egramButton.addEventListener('click', egramButtonClicked);
+newPatientButton.addEventListener('click', newPatientButtonClicked);
 
 paramsView.eventListeners.push({ id: 'btn-dsn', on: 'click', action: dsnButtonClicked });
 paramsView.eventListeners.push({ id: 'select-pacing', on: 'input', action: selectPacingMode });
 paramsView.eventListeners.push({ id: 'btn-read', on: 'click', action: readButtonClicked });
+paramsView.eventListeners.push({ id: 'btn-pace-now', on: 'click', action: paceNowButtonClicked });
 paramsView.eventListeners.push({ id: 'btn-save', on: 'click', action: saveButtonClicked });
 paramsView.eventListeners.push({ id: 'btn-write', on: 'click', action: writeButtonClicked });
 paramsView.eventListeners.push({ id: 'btn-cancel', on: 'click', action: cancelButtonClicked });
@@ -246,7 +274,7 @@ paramsView.show(dsn);
 function getParamsFromInput() {
   const params = {};
 
-  const selectedMode = paramsView.pacingModeInput.value.toUpperCase();
+  const selectedMode = paramsView.pacingModeInput.value;
   pacingModesParams[selectedMode].forEach(param => {
     if (param === 'at') {
       params[param] = parseInt(document.getElementById(`input-range-${param}`).value);

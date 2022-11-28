@@ -16,6 +16,8 @@ class ParamsView {
   }
 
   show(dsn = '', serialConnection = false) {
+    document.title = 'Pacemaker DCM · Parameters';
+
     this.viewContainer.innerHTML = [
       '<h2>Pacemaker Parameters</h2>',
       '<p>Select a pacing mode below to start viewing and configuring the corresponding parameters.</p>',
@@ -43,20 +45,31 @@ class ParamsView {
       '      </select>',
       '        <label for="floatingSelect">Pacing Mode</label>',
       '    </div>',
-      `    <button type="button" class="col btn btn-primary" id="btn-read"${serialConnection ? '' : ' disabled'}>Read Parameters from Pacemaker</button>`,
+      `    <button type="button" class="col btn btn-outline-primary" id="btn-read"${serialConnection ? '' : ' disabled'}><i class="bi bi-box-arrow-down"></i> Pacemaker Read</button>`,
+      `    <button type="button" class="col btn btn-outline-primary" id="btn-pace-now"${serialConnection ? '' : ' disabled'}><i class="bi bi-lightning-charge-fill"></i> Pace Now</button>`,
       '  </div>',
       '</div>',
       '<br>',
       '<div class="row align-items-center" id="container-sliders"></div>',
       '<div class="row container text-center">',
       '  <div class="col-md-3">',
-      '    <button type="button" class="col btn btn-primary" id="btn-save" disabled>Save on DCM</button>',
+      '    <button type="button" class="col btn btn-primary" id="btn-save" disabled>',
+      '      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">',
+      '        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />',
+      '        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z" />',
+      '      </svg>',
+      '    Save on DCM</button>',
+      '  </div>',
+      '  <div class="col-md-4">',
+      '    <button type="button" class="col btn btn-primary" id="btn-write" disabled><i class="bi bi-box-arrow-in-up"></i> Pacemaker Write</button>',
       '  </div>',
       '  <div class="col-md-3">',
-      '    <button type="button" class="col btn btn-primary" id="btn-write" disabled>Write to Pacemaker</button>',
-      '  </div>',
-      '  <div class="col-md-3">',
-      '    <button type="button" class="col btn btn-danger" id="btn-cancel">CANCEL</button>',
+      '    <button type="button" class="col btn btn-outline-danger" id="btn-cancel">',
+      '      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">',
+      '        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />',
+      '        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />',
+      '      </svg>',
+      '    Discard Input</button>',
       '  </div>',
       '</div>'
     ].join("\n");
@@ -65,6 +78,7 @@ class ParamsView {
     this.dsnButton = document.getElementById('btn-dsn');
     this.pacingModeInput = document.getElementById('select-pacing');
     this.readButton = document.getElementById('btn-read');
+    this.paceNowButton = document.getElementById('btn-pace-now');
     this.slidersContainer = document.getElementById('container-sliders');
     this.saveButton = document.getElementById('btn-save');
     this.writeButton = document.getElementById('btn-write');
@@ -149,21 +163,20 @@ class ParamsView {
   }
 
   handleInput(slider, param) {
-    const paramU = param.toUpperCase();
-    const ranges = paramConfigs[paramU][2];
+    const ranges = paramConfigs[param][2];
 
     // Handle the input depending on the specific parameter
-    switch (paramU) {
-      case 'LRL':
+    switch (param) {
+      case 'lrl':
         this.checkBoundriesLRL(slider, ranges);
         break;
-      case 'URL':
+      case 'url':
         this.checkBoundriesURL(slider);
         break;
     }
 
     // Set the text field to the current value of the slider
-    if (paramU === 'AT') {
+    if (param === 'at') {
       document.getElementById(`text-${param}`).value = activityThresValues[slider.value];
     } else {
       document.getElementById(`text-${param}`).value = slider.value;
