@@ -150,7 +150,7 @@ class Connection {
       case pacingModeHex.voo:
         pacingMode = 'voo';
         break;
-      case pacingModeHex.aii:
+      case pacingModeHex.aai:
         pacingMode = 'aai';
         break;
       case pacingModeHex.vvi:

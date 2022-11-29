@@ -4,6 +4,7 @@ const AlertView = require('./views/alert.js');
 const User = require('./models/user.js');
 const Connection = require('./controllers/connection.js');
 const Plotly = require('plotly.js-dist-min');
+const { jsPDF } = require('jspdf');
 
 const egramButton = document.getElementById('btn-egram');
 const paramsButton = document.getElementById('btn-params');
@@ -12,6 +13,7 @@ const aboutButton = document.getElementById('btn-about');
 const userItem = document.getElementById('itm-user');
 const logoutItem = document.getElementById('itm-logout');
 const connectButton = document.getElementById('btn-connect');
+const printButton = document.getElementById('btn-print');
 
 // Text to be displayed in the "About" tab of the GUI
 const aboutText =
@@ -67,7 +69,7 @@ if (!currentUser) {
 userItem.textContent = currentUser.username;
 const dsn = currentUser.data.dsn ? currentUser.data.dsn : '';
 
-const aboutButtonClicked = () => alert(aboutText);
+const aboutButtonClicked = () => window.alert(aboutText);
 const logoutClicked = () => {
   currentUser.logout();
   window.location.href = 'index.html';
@@ -128,7 +130,7 @@ const connectButtonClicked = async () => {
         setTimeout(() => {
           alertView.showAlert('success', `Device S/N:${currentUser.data.dsn} successfully connected!`);
           connectButton.className = 'btn btn-danger';
-          connectButton.innerText = 'Disconnect Device';
+          connectButton.innerHTML = connectButton.innerHTML.replace('Connect', 'Disconnect');
           connectButton.disabled = false;
           paramsView.readButton.disabled = false;
           paramsView.paceNowButton.disabled = false;
@@ -157,10 +159,39 @@ const serialConnectionClosed = () => {
   serialConnection.disconnect();
   alertView.showAlert('warning', `Device S/N:${currentUser.data.dsn} disconnected`);
   connectButton.className = 'btn btn-outline-success';
-  connectButton.innerText = 'Connect Device';
+  connectButton.innerHTML = connectButton.innerHTML.replace('Disconnect', 'Connect');
   paramsView.readButton.disabled = true;
   paramsView.paceNowButton.disabled = true;
   paramsView.writeButton.disabled = true;
+};
+
+const printButtonClicked = () => {
+  if (egramRunning) {
+    window.print();
+    return;
+  }
+
+  const doc = new jsPDF();
+  const fileName = 'brady-parameters-report.pdf';
+  const infoText = aboutText + '\nDate: ' + new Date(Date.now()).toLocaleString();
+
+  doc.text('Pacemaker DCM - Bradycardia Parameters Report', 10, 20);
+  doc.text(infoText, 10, 40);
+  doc.text(`Pacing Mode: ${paramsView.pacingModeInput.value.toUpperCase()}`, 10, 80);
+
+  let offset = 85;
+  const selectedMode = paramsView.pacingModeInput.value;
+  pacingModesParams[selectedMode].forEach(param => {
+    const paramConfig = paramConfigs[param];
+    let value = document.getElementById(`text-${param}`).value;
+    if (value === '-') value = 'OFF';
+
+    doc.text(`${paramConfig[0]}:`, 10, offset += 7);
+    doc.text(`${param === 'pvarp' ? '\t\t\t' : ''} ${value} ${paramConfig[1]}`, 102, offset);
+  });
+
+  doc.save(fileName);
+  window.alert('Report was saved to:\n' + fileName);
 };
 
 const dsnButtonClicked = () => {
@@ -249,6 +280,7 @@ const cancelButtonClicked = () => {
 
 // Register event listeners/handler
 connectButton.addEventListener('click', connectButtonClicked);
+printButton.addEventListener('click', printButtonClicked);
 aboutButton.addEventListener('click', aboutButtonClicked);
 logoutItem.addEventListener('click', logoutClicked);
 paramsButton.addEventListener('click', paramsButtonClicked);

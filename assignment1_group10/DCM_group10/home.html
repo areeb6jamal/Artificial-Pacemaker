@@ -12,7 +12,7 @@
   <body>
 
   <main>
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar sticky-top bg-white">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
           <img src="./assets/mcmaster-small.png" alt="Logo" width="19" height="26" class="d-inline-block align-text-top">
@@ -20,23 +20,29 @@
         </a>
         <button class="btn btn-success invisible" type="button" aria-expanded="false"></button>
         <button class="btn btn-secondary" id="btn-params" type="button">Parameters</button>
-        <p style="color:white;">_</p>
+        <p style="color:transparent;">_</p>
         <button class="btn btn-secondary" id="btn-egram" type="button">EGRAM</button>
-        <p style="color:white;">_</p>
+        <p style="color:transparent;">_</p>
         <button class="btn btn-secondary" id="btn-new-patient" type="button">New Patient</button>
-        <p style="color:white;">_</p>
+        <p style="color:transparent;">_</p>
         <button class="btn btn-secondary" id="btn-about" type="button">About</button>
         <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
         <form class="d-flex" role="user">
           <button id="btn-connect" class="btn btn-outline-success" type="button" aria-expanded="false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-usb-symbol" viewBox="0 0 16 16">
-              <path
-                d="m7.792.312-1.533 2.3A.25.25 0 0 0 6.467 3H7.5v7.319a2.5 2.5 0 0 0-.515-.298L5.909 9.56A1.5 1.5 0 0 1 5 8.18v-.266a1.5 1.5 0 1 0-1 0v.266a2.5 2.5 0 0 0 1.515 2.298l1.076.461a1.5 1.5 0 0 1 .888 1.129 2.001 2.001 0 1 0 1.021-.006v-.902a1.5 1.5 0 0 1 .756-1.303l1.484-.848A2.5 2.5 0 0 0 11.995 7h.755a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h.741a1.5 1.5 0 0 1-.747 1.142L8.76 8.99a2.584 2.584 0 0 0-.26.17V3h1.033a.25.25 0 0 0 .208-.389L8.208.312a.25.25 0 0 0-.416 0Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-usb-symbol" viewBox="0 0 16 16">
+              <path d="m7.792.312-1.533 2.3A.25.25 0 0 0 6.467 3H7.5v7.319a2.5 2.5 0 0 0-.515-.298L5.909 9.56A1.5 1.5 0 0 1 5 8.18v-.266a1.5 1.5 0 1 0-1 0v.266a2.5 2.5 0 0 0 1.515 2.298l1.076.461a1.5 1.5 0 0 1 .888 1.129 2.001 2.001 0 1 0 1.021-.006v-.902a1.5 1.5 0 0 1 .756-1.303l1.484-.848A2.5 2.5 0 0 0 11.995 7h.755a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h.741a1.5 1.5 0 0 1-.747 1.142L8.76 8.99a2.584 2.584 0 0 0-.26.17V3h1.033a.25.25 0 0 0 .208-.389L8.208.312a.25.25 0 0 0-.416 0Z" />
             </svg>
-
             Connect Device
           </button>
-          <p style="color:white;">_</p>
+          <p style="color:transparent;">_</p>
+          <button class="btn btn-outline-secondary" id="btn-print" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+              <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z" />
+              <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+            </svg>
+            Print Report
+          </button>
+          <p style="color:transparent;">_</p>
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               Account

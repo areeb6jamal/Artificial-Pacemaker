@@ -26,17 +26,23 @@ loginTabButton.addEventListener('click', () => {
 });
 
 registerButton.addEventListener('click', () => {
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  if (registerUsernameInput.value.match(usernameRegex) === null) {
+    window.alert('Username is not valid. Only characters A-Z, a-z, 0-9 and _ are acceptable.');
+    return;
+  }
+
   const user = new User(-1, registerUsernameInput.value,
     registerEmailInput.value, registerPasswordInput.value);
 
   if (User.numRegisteredUsers === 10) {
-    alert('Error: Maximum number of users (10) has been reached!');
+    window.alert('Error: Maximum number of users (10) has been reached!');
     return;
   }
 
   const registerResult = user.register();
   if (registerResult === false) {
-    alert('Error: Username "' + user.username + '" already exists!');
+    window.alert('Error: Username "' + user.username + '" already exists!');
     registerUsernameInput.focus();
   }
 });
@@ -48,7 +54,7 @@ registerForm.addEventListener('keypress', e => {
 loginButton.addEventListener('click', () => {
   const user = User.getUserByUsername(loginUsernameInput.value);
   if (user === null) {
-    alert('Error: Username does not exist!');
+    window.alert('Error: Username does not exist!');
     loginUsernameInput.focus();
     loginPasswordInput.value = '';
     return;
@@ -59,7 +65,7 @@ loginButton.addEventListener('click', () => {
   if (loginResult) {
     window.location.href = 'home.html';
   } else {
-    alert('Error: Password is not correct!');
+    window.alert('Error: Password is not correct!');
     loginPasswordInput.value = '';
     loginPasswordInput.focus();
   }
