@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 
 let highestUserId = -1;
 const saltRounds = 10;
@@ -23,7 +23,7 @@ class User {
     this.id = ++highestUserId;
 
     // Hash the plaintext password
-    this.password = bcrypt.hashSync(this.password, saltRounds);
+    //this.password = bcrypt.hashSync(this.password, saltRounds);
 
     // Save user in local storage
     localStorage.setItem(this.username, JSON.stringify([this.id,
@@ -33,7 +33,7 @@ class User {
   }
 
   login(plaintextPassword) {
-    if (bcrypt.compareSync(plaintextPassword, this.password)) {
+    if (plaintextPassword === this.password) {
       User.currentUser = this;
       return true;
     } else {
